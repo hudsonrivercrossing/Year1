@@ -2,7 +2,7 @@
 
 送给 DJ 与 YW 的一周年互动纪念礼物。主题来自照片中的 **Experience the world together**：一起，体验这个世界。
 
-参考照片：`assets/reference/anniversary-frame.png`。按用户最后确认，不展示具体日期，只保留 **1 year anniversary**。目前人物采用照片里的基础配色与长发；衣服花纹、眼镜及手持配件尚未精确还原。
+参考照片：`assets/reference/anniversary-frame.png`。按用户最后确认，不展示具体日期，只保留 **1 year anniversary**。DJ 已换用标准圆框眼镜头；两件上衣对照照片与零件目录重绘了正反面印花。发型、YW 脸和手持配件仍待核对，详见 [TODO](TODO.md)。
 
 ## 运行
 
@@ -26,7 +26,7 @@ npm run dev
 - 右上角 EN / 中文 即时切换语言，不重置拼装或动作。音乐按钮播放/暂停新版约 71 秒的周年纯音乐《Built With Love》；默认关闭，渐入渐出，循环播放。音频也可从 `public/audio/built-with-love.mp3` 单独打开。
 - 可切换到“我太懒了”（I’m too lazy，右上角 zzz），使用原有引导拼装，逐件提供组件，支持“装上这一块”和“自动拼装”。切换模式会重新开始拼装。
 - 两人组装完后点“唤醒小世界”，观看过渡和自主漫步。
-- 挥手、拥抱、跳舞结束后均自动恢复漫步。互动期间按钮暂停，避免动作冲突。
+- 挥手、拥抱、跳舞，以及“小小心动”菜单中的“亲脸颊”“羞羞”，结束后均自动恢复漫步。菜单还提供“亲亲 → 羞羞 → 抱抱”组合；“先歇一会”可取消当前动作和后续组合。互动发生在两人当前所在位置附近，不会瞬移回原点。
 - 玩耍阶段支持拖动视角、滚轮缩放。音效和音乐独立：右上角扬声器开关控制音效，默认开启、首次交互后才发声；音乐仍默认关闭。
 - “重新拼装”重置角色、镜头和动作。
 
@@ -36,6 +36,7 @@ npm run dev
 
 | LDraw ID | 零件 |
 | --- | --- |
+| 3626cp8y | DJ 圆框眼镜脸（BrickLink 3626pb1507） |
 | 3626cp01 | 标准笑脸头，空心顶柱 |
 | 973 | 躯干 |
 | 3815 | 髋部（库中保留的旧版形状） |
@@ -101,3 +102,13 @@ See `public/ldraw-source/CAreadme.txt` and the license files there. Derived geom
 ## 轻音效
 
 `src/sound-effects.ts` 使用 Web Audio 生成原创短音效，无需外部音效文件或网络请求。成功拼接是轻塑料扣合声；未吸附零件的落地、回弹由 cannon-es 的真实接触事件触发，音量随冲击强度变化，过滤静止抖动与过密碰撞。最终拼好、唤醒、招呼、实际抱到一起、跳舞各有不同的温暖短旋律。主音效增益 0.28，包络柔和；扬声器可独立静音并保存偏好。`scripts/check-keepsake-sounds.js` 检查实际流程触发与离线渲染峰值。
+
+## 照片外观与动作升级
+
+`v1.0.0`（7534e3f）保留为回溯基线。本轮待办、完成项与后续顺序集中在 [TODO.md](TODO.md)。
+
+- 上衣使用标准 `973` 几何，正反面采用原创重绘印花层：DJ 对照 `973pb5102c01`，YW 对照 `973pb3541c01`。这不是官方印花模型或目录照片贴图；后续可以独立替换。来源说明见 `public/textures/README.md`，重生成：`python3 scripts/prepare_portrait_prints.py`。
+- DJ 使用官方 LDraw `3626cp8y`，原作者与依赖子件保留在 `public/ldraw-source/`。`scripts/prepare_parts.py` 从同一库的 `LDConfig.ldr` 提取颜色值，浏览器与 Blender 共用 `src/ldraw-colors.json`，保证眼白、镜框和眉毛不被误画成黄色。
+- 可编辑的 `assets/characters.blend` 和 `public/models/characters.glb` 已同步外观；四张衣服贴图内嵌在文件中。运行时动作用 `src/affection.ts` 编排，未烘焙进静态 GLB。
+- 亲脸颊与羞羞配有低音量原创音效；每次动作只触发一次。亲脸颊在转头靠近后的停留阶段发声；音乐与音效仍可分别开关。
+- `scripts/check-portraits-affection.js` 检查新动作/组合、取消和复位、双语手机菜单、轻音效峰值及尾音；`scripts/check-free-assembly.js` 检查 12 块零件的真实拖拽拼装。

@@ -36,11 +36,17 @@ def expand(name,a,t,color,geo,depth=0):
    # Double-sided material makes mirrored subparts and BFC inversion safe.
    for tri in ([(0,1,2)] if kind=='3' else [(0,1,2),(0,2,3)]):
     for i in tri:geo[c].extend(vs[i])
-parts=['3626cp01','973','3815','3816','3817','3818','3819','3820','3901','87991','4530']
+parts=['3626cp8y','3626cp01','973','3815','3816','3817','3818','3819','3820','3901','87991','4530']
 for part in parts:
  geo=defaultdict(list);expand(part+'.dat',[1,0,0,0,1,0,0,0,1],[0,0,0],'16',geo)
  (out/(part+'.json')).write_text(json.dumps(dict(geo),separators=(',',':')))
  print(part,sum(len(x)//9 for x in geo.values()),'triangles')
+# Share the authoritative palette with both browser and Blender importers.
+import re
+config=z.read(names['ldraw/ldconfig.ldr']).decode('utf-8-sig')
+colours={code:value for code,value in re.findall(r'!COLOUR\s+\S+\s+CODE\s+(\d+)\s+VALUE\s+(#[0-9A-Fa-f]{6})',config)}
+Path('src/ldraw-colors.json').write_text(json.dumps(colours,indent=2))
+(sources/'LDConfig.ldr').write_text(config)
 for path in sorted(used):
  target=sources/path.removeprefix('ldraw/');target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(z.read(path))
 for name in ['CAreadme.txt','CAlicense.txt','CAlicense4.txt','Readme.txt']:

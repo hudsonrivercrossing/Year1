@@ -43,7 +43,7 @@ export class FreeAssembly {
       shape.position.copy(center).negate();
       const visual=new T.Group();visual.add(shape);scene.add(visual);
       const ghost=this.clone(source);source.getWorldPosition(ghost.position);source.getWorldQuaternion(ghost.quaternion);
-      ghost.traverse(o=>{if(o instanceof T.Mesh){const material=o.material as T.MeshStandardMaterial;material.transparent=true;material.opacity=.1;material.depthWrite=false;o.castShadow=false;}});scene.add(ghost);
+      ghost.traverse(o=>{if(o instanceof T.Mesh){if(o.userData.print)o.visible=false;const material=o.material as T.MeshStandardMaterial;material.transparent=true;material.opacity=.1;material.depthWrite=false;o.castShadow=false;}});scene.add(ghost);
       const body=new C.Body({mass:.2,shape:new C.Box(new C.Vec3(Math.max(.12,half.x),Math.max(.12,half.y),Math.max(.12,half.z))),linearDamping:.25,angularDamping:.4,sleepSpeedLimit:.12,sleepTimeLimit:.6});
       this.world.addBody(body);
       let lastImpact=-1;
