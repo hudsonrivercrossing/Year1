@@ -5,11 +5,11 @@
 - 发布日期：2026-10-21。
 - 发布状态：Sites 原生操作返回 `succeeded`。
 - 项目 ID：`appgprj_6ad83efe21fc8191b7860f21faf541e8`。
-- 部署 ID：`appgdep_6ad8b9a526c48191ad459f69bb46fbf4`。
-- 版本 ID：`appgprj_6ad83efe21fc8191b7860f21faf541e8~appgver_62a7c26bab3c819188c407570307bcf3`。
-- 对应本地功能提交：`5ebe770`（DJ 白髋与窄腰线）；YW 发型第二版 `02fa3b1`；布局与动作 `1742337`。`v1.0.0` 标签保持不变。
-- Sites 源码提交：`fc3111defa5c164a5abe13a555d71ea84fb6f0bb`。
-- 本次增量：DJ 改为白色髋部，顶部保留窄深色腰线，去掉整块黑色裆部；Blender 与 GLB 同步。
+- 部署 ID：`appgdep_6ad8bb48b5fc8191b7f5e431062fb620`。
+- 版本 ID：`appgprj_6ad83efe21fc8191b7860f21faf541e8~appgver_cf864e63d8688191b90fccb6c42c8f3d`。
+- 对应本地功能提交：`4c2f2ec`（甜筒比例与握持姿态）；DJ 白髋与窄腰线 `5ebe770`；YW 发型第二版 `02fa3b1`；布局与动作 `1742337`。`v1.0.0` 标签保持不变。
+- Sites 源码提交：`161afa3efa48c73ac8d48663e06bcb48cb23fd03`。
+- 本次增量：33120 删除重复叠放的 6254，甜筒总高降低约 29%，标准零件尺寸保持不变；DJ 灰杯抬高手持，网页、物理碰撞与 Blender/GLB 同步。
 - 本轮内容：手机工作台布局、照片部件与配色、六个新动作、两条新组合、四件手持物的放落/返回拾取；[验收记录](mobile-actions-validation.md)。
 - 发布构建与本地生产构建的 145 个文件逐一 SHA256 一致。
 

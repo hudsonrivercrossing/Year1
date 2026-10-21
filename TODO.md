@@ -73,3 +73,5 @@
 
 - [x] 当前版本发布到 ChatGPT Sites，保留账号私有访问；[部署记录](docs/sites-deployment.md)。
 - [x] 本轮更新已发布成功，完整生产包通过验收；本地实现提交 1742337，v1.0.0 回溯点未移动。
+
+- [x] 道具比例与握持修正版 `4c2f2ec` 已发布原私有 Site，部署 `appgdep_6ad8bb48b5fc8191b7f5e431062fb620` succeeded；145 个生产资源逐文件 SHA256 与本地一致。
