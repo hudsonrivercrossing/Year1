@@ -36,7 +36,7 @@ def expand(name,a,t,color,geo,depth=0):
    # Double-sided material makes mirrored subparts and BFC inversion safe.
    for tri in ([(0,1,2)] if kind=='3' else [(0,1,2),(0,2,3)]):
     for i in tri:geo[c].extend(vs[i])
-parts=['3626cp8y','3626cp01','973','3815','3816','3817','3818','3819','3820','3901','87991','4530']
+parts=['99930','3626cp8r','90540','3899','33120','6254','3626cp8y','3626cp01','973','3815','3816','3817','3818','3819','3820','3901','87991','4530']
 for part in parts:
  geo=defaultdict(list);expand(part+'.dat',[1,0,0,0,1,0,0,0,1],[0,0,0],'16',geo)
  (out/(part+'.json')).write_text(json.dumps(dict(geo),separators=(',',':')))
@@ -52,5 +52,7 @@ for path in sorted(used):
 for name in ['CAreadme.txt','CAlicense.txt','CAlicense4.txt','Readme.txt']:
  path='ldraw/'+name
  if path.lower() in names:(sources/name).write_bytes(z.read(names[path.lower()]))
-(out/'manifest.json').write_text(json.dumps({'source':'https://library.ldraw.org/library/updates/complete.zip','parts':parts,'sourceFiles':len(used)},indent=2))
+import runpy
+runpy.run_path('scripts/prepare_yw_hair.py')
+(out/'manifest.json').write_text(json.dumps({'source':'https://library.ldraw.org/library/updates/complete.zip','parts':parts+['yw-long-bangs-approx'],'originalApproximations':['yw-long-bangs-approx'],'sourceFiles':len(used)},indent=2))
 print('Source files retained:',len(used))

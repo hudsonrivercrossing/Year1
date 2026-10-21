@@ -1,4 +1,34 @@
 [
- {"name":"DJ","torso":"#9FC3E9","arm":"#9FC3E9","legs":"#eee5cf","hips":"#eee5cf","headPart":"3626cp8y","shirtPrint":"dj-sweater","shirtCatalog":"973pb5102c01","hair":"#24221f","hairPart":"3901"},
- {"name":"YW","torso":"#F4F4F4","arm":"#F4F4F4","legs":"#428d98","hips":"#428d98","headPart":"3626cp01","shirtPrint":"yw-stripes","shirtCatalog":"973pb3541c01","hair":"#24221f","hairPart":"4530"}
+  {
+    "name": "DJ",
+    "torso": "#9DC3F7",
+    "arm": "#9DC3F7",
+    "legs": "#F4F4F4",
+    "hips": "#1B2A34",
+    "headPart": "3626cp8y",
+    "shirtPrint": "dj-sweater",
+    "shirtCatalog": "973pb5102c01",
+    "hair": "#1B2A34",
+    "hairPart": "99930",
+    "skin": "#FAC80A",
+    "hairCatalog": "99930",
+    "hairConfidence": "best visual match; mold not uniquely identifiable"
+  },
+  {
+    "name": "YW",
+    "torso": "#F4F4F4",
+    "arm": "#F4F4F4",
+    "legs": "#069D9F",
+    "hips": "#069D9F",
+    "headPart": "3626cp8r",
+    "shirtPrint": "yw-stripes",
+    "shirtCatalog": "973pb3541c01",
+    "hair": "#1B2A34",
+    "hairPart": "yw-long-bangs-approx",
+    "skin": "#FAC80A",
+    "hairCatalog": "17346 / 75867",
+    "hairConfidence": "original visual approximation; exact asset pending",
+    "headCatalog": "3626pb1352",
+    "headConfidence": "front-face family matches; 1352 vs 2662 reverse face cannot be distinguished"
+  }
 ]

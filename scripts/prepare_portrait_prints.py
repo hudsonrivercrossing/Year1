@@ -7,7 +7,7 @@ out=Path('public/textures');out.mkdir(exist_ok=True)
 size=1024
 for kind in ['dj-sweater','yw-stripes']:
  for side in ['front','back']:
-  im=Image.new('RGB',(size,size),'#9FC3E9' if kind=='dj-sweater' else '#F4F4F4');d=ImageDraw.Draw(im)
+  im=Image.new('RGB',(size,size),'#9DC3F7' if kind=='dj-sweater' else '#F4F4F4');d=ImageDraw.Draw(im)
   if kind=='dj-sweater':
    navy='#17394e';cream='#f5f1dc';blue='#467ea7'
    d.rectangle((0,0,1024,265),fill=navy)

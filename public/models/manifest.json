@@ -1,6 +1,12 @@
 {
   "source": "https://library.ldraw.org/library/updates/complete.zip",
   "parts": [
+    "99930",
+    "3626cp8r",
+    "90540",
+    "3899",
+    "33120",
+    "6254",
     "3626cp8y",
     "3626cp01",
     "973",
@@ -12,7 +18,11 @@
     "3820",
     "3901",
     "87991",
-    "4530"
+    "4530",
+    "yw-long-bangs-approx"
   ],
-  "sourceFiles": 70
+  "originalApproximations": [
+    "yw-long-bangs-approx"
+  ],
+  "sourceFiles": 95
 }

@@ -1,11 +1,13 @@
 """blender --background --python scripts/build_blender.py
 Build an editable hierarchy from the same standard-part meshes as the browser.
 """
-import bpy, json, math
+import bpy, bmesh, json, math
+from mathutils import Quaternion
 from pathlib import Path
 root=Path(__file__).resolve().parent.parent
 bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=False)
 S=.035
+bpy.context.preferences.filepaths.save_version=0
 palette=json.loads((root/'src/ldraw-colors.json').read_text())
 # Blender Z up; glTF export automatically converts to web Y up.
 def position(v):return (v[0]*S,v[2]*S,-v[1]*S)
@@ -26,9 +28,16 @@ def part(id,color,parent):
  for code,coords in data.items():
   verts=[position(coords[i:i+3]) for i in range(0,len(coords),3)]
   mesh=bpy.data.meshes.new(id);mesh.from_pydata(verts,[],[(i,i+1,i+2) for i in range(0,len(verts),3)]);mesh.update()
-  obj=bpy.data.objects.new('LDraw_'+id,mesh);bpy.context.collection.objects.link(obj);obj.parent=parent
+  if id=='yw-long-bangs-approx':
+   # Match the web mergeVertices + smooth normal treatment of original hair.
+   bm=bmesh.new();bm.from_mesh(mesh);bmesh.ops.remove_doubles(bm,verts=list(bm.verts),dist=.0001);bm.to_mesh(mesh);bm.free()
+   for face in mesh.polygons:face.use_smooth=True
+  obj=bpy.data.objects.new(('Original_' if id=='yw-long-bangs-approx' else 'LDraw_')+id,mesh);bpy.context.collection.objects.link(obj);obj.parent=parent
   mesh.materials.append(material(color if code=='16' else palette.get(code,'#'+code[3:] if code.lower().startswith('0x2') else color)))
-  obj['ldraw_part']=id;obj['source']='LDraw.org';obj['license']='CC BY 4.0; see public/ldraw-source'
+  if id=='yw-long-bangs-approx':
+   obj['part_id']=id;obj['source']='Original procedural project geometry; see public/models/yw-long-bangs-approx.meta.json';obj['catalog_reference']='17346/75867 visual approximation; exact mold unconfirmed'
+  else:
+   obj['ldraw_part']=id;obj['source']='LDraw.org';obj['license']='CC BY 4.0; see public/ldraw-source'
  return obj
 def shirt_print(name,parent):
  outline=[(-12,0),(12,0),(14.345,2),(19,29),(19,32),(-19,32),(-19,29),(-14.345,2)]
@@ -48,15 +57,31 @@ def shirt_print(name,parent):
   obj['source']='Original procedural print redraw; see public/textures/README.md'
 for i,d in enumerate(json.loads((root/'src/character-definitions.json').read_text())):
  rig=empty(d['name'],xyz=(-2 if i==0 else 2,0,72*S));rig['units']='LDraw units converted at 0.035 scene units/LDU'
- torso=empty('torso',rig);part('973',d['torso'],torso);shirt_print(d['shirtPrint'],torso)
+ waist=empty('waist',rig,position((0,32,0)));upper=empty('upper',waist,position((0,-32,0)))
+ torso=empty('torso',upper);part('973',d['torso'],torso);shirt_print(d['shirtPrint'],torso)
  legs=empty('legs',rig,position((0,32,0)));part('3815',d['hips'],legs)
  for id,x in [('3816',-10),('3817',10)]:
   pivot=empty('hip_'+id,legs,position((x,12,0)));shape=empty('leg_shape',pivot,position((-x,0,0)));part(id,d['legs'],shape)
+ hands={}
  for name,id,x in [('rightArm','3818',-15.552),('leftArm','3819',15.552)]:
-  arm=empty(name,rig,position((x,9,0)));arm.rotation_euler.y=(1 if name=='rightArm' else -1)*math.radians(9.782);part(id,d['arm'],arm)
-  hand=empty('hand',arm,position((-5 if name=='rightArm' else 5,20,-10)));hand.rotation_euler.x=math.pi/4;part('3820','#f2cb42',hand)
- head=empty('head',rig,position((0,-24,0)));part(d['headPart'],'#f2cb42',head)
- hair=empty('hair',rig,position((0,-24,0)));part(d['hairPart'],d['hair'],hair)
+  arm=empty(name,upper,position((x,9,0)));arm.rotation_euler.y=(1 if name=='rightArm' else -1)*math.radians(9.782);part(id,d['arm'],arm)
+  if name=='rightArm':
+   arm.rotation_mode='QUATERNION';arm.rotation_quaternion=Quaternion((1,0,0),-.65)@Quaternion((0,1,0),math.radians(9.782))
+  hand=empty('hand',arm,position((-5 if name=='rightArm' else 5,20,-10)));hand.rotation_euler.x=math.pi/4;part('3820',d['skin'],hand);hands[name]=hand
+ head=empty('head',upper,position((0,-24,0)));part(d['headPart'],d['skin'],head)
+ hair=empty('hair',upper,position((0,-24,0)));part(d['hairPart'],d['hair'],hair)
+ for hand_name,kind in [('rightArm','pole'),('leftArm','mug' if i==0 else 'iceCream')]:
+  socket=empty('photo_grip_'+hand_name,hands[hand_name],position((0,-.8229,-9.8948)))
+  socket['source']='LDraw 3820 !HELP grip centre';socket['lifecycle']='Web: drop once per complete activity, return and pick up after finish/cancel'
+  if kind=='pole':
+   socket.rotation_euler.x=math.radians(19.5)
+   model=empty('pole_offset',socket,position((0,-8,0)));part('90540','#758b7d',model)
+  else:
+   bpy.context.view_layer.update();socket.rotation_mode='QUATERNION';socket.rotation_quaternion=hands[hand_name].matrix_world.to_quaternion().inverted()@rig.matrix_world.to_quaternion()
+   if kind=='mug':
+    model=empty('mug_handle_offset',socket,position((0,-11,-20)));part('3899','#8a9295',model)
+   else:
+    part('33120','#d9bb7b',socket);scoops=empty('ice_cream_offset',socket,position((0,-42,0)));part('6254','#ed951f',scoops)
 bpy.ops.wm.save_as_mainfile(filepath=str(root/'assets/characters.blend'))
 bpy.ops.export_scene.gltf(filepath=str(root/'public/models/characters.glb'),export_format='GLB',export_yup=True)
 print('Saved editable standard-part characters and GLB')

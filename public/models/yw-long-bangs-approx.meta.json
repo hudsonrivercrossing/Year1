@@ -1,0 +1,12 @@
+{
+  "id": "yw-long-bangs-approx",
+  "source": "Original procedural project geometry",
+  "generator": "scripts/prepare_yw_hair.py",
+  "officialLDraw": false,
+  "catalogReferences": [
+    "https://www.bricklink.com/v2/catalog/catalogitem.page?P=17346",
+    "https://www.bricklink.com/v2/catalog/catalogitem.page?P=75867"
+  ],
+  "description": "Visual long-straight-bangs approximation on the nominal standard minifig head origin. Neither exact mold nor soft/hard material variant is confirmed. No third-party mesh used; not a manufacturing model.",
+  "triangles": 3690
+}

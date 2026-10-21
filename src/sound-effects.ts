@@ -1,4 +1,4 @@
-export type SoundCue='snap'|'drop'|'complete'|'awaken'|'wave'|'hug'|'dance'|'kiss'|'shy';
+export type SoundCue='snap'|'drop'|'complete'|'awaken'|'wave'|'hug'|'dance'|'kiss'|'shy'|'holdHands'|'highFive'|'look';
 
 /** Soft, original Web Audio cues. All envelopes start/end at zero to avoid clicks. */
 export function scheduleCue(ctx:BaseAudioContext,output:AudioNode,cue:SoundCue,at:number,strength=1){
@@ -26,6 +26,9 @@ export function scheduleCue(ctx:BaseAudioContext,output:AudioNode,cue:SoundCue,a
   case 'wave':tone(783.99,0,.2,.07,'sine',880);tone(987.77,.18,.28,.06);break;
   case 'hug':tone(261.63,0,.8,.075);tone(329.63,.09,.8,.05);tone(392,.18,.85,.05);break;
   case 'kiss':tone(659.25,0,.24,.045,'sine',739.99);tone(987.77,.12,.4,.032);break;
+  case 'holdHands':tone(329.63,0,.65,.04);tone(493.88,.18,.65,.025);break;
+  case 'highFive':tap(.075,1900,.035);tone(880,.01,.13,.035,'triangle',660);break;
+  case 'look':tone(261.63,0,.85,.025);tone(392,.16,.85,.02);break;
   case 'shy':tone(523.25,0,.42,.04);tone(659.25,.2,.52,.03);break;
   case 'dance':phrase([523.25,659.25,783.99,659.25,587.33,783.99],.17,.18,.065);break;
  }
@@ -37,7 +40,7 @@ export class SoundEffects{
  private context?:AudioContext;
  private master?:GainNode;
  private nextImpact=0;
- private counts:Record<SoundCue,number>={snap:0,drop:0,complete:0,awaken:0,wave:0,hug:0,dance:0,kiss:0,shy:0};
+ private counts:Record<SoundCue,number>={snap:0,drop:0,complete:0,awaken:0,wave:0,hug:0,dance:0,kiss:0,shy:0,holdHands:0,highFive:0,look:0};
  unlock(){
   if(!this.enabled)return;
   try{

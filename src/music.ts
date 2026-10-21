@@ -10,6 +10,6 @@ export class AnniversaryMusic {
   await this.audio.play();this.enabled=true;this.ramp(.20);return true;
  }
  private ramp(target:number,done?:()=>void){if(this.fade)cancelAnimationFrame(this.fade);const start=this.audio.volume,at=performance.now();
-  const tick=(now:number)=>{const p=Math.min(1,(now-at)/1100);this.audio.volume=start+(target-start)*p;if(p<1)this.fade=requestAnimationFrame(tick);else done?.();};this.fade=requestAnimationFrame(tick);
+  const tick=(now:number)=>{const p=Math.max(0,Math.min(1,(now-at)/1100));this.audio.volume=Math.max(0,Math.min(1,start+(target-start)*p));if(p<1)this.fade=requestAnimationFrame(tick);else{this.fade=undefined;done?.();}};this.fade=requestAnimationFrame(tick);
  }
 }
