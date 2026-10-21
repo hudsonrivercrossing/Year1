@@ -9,6 +9,7 @@ bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=Fals
 S=.035
 bpy.context.preferences.filepaths.save_version=0
 palette=json.loads((root/'src/ldraw-colors.json').read_text())
+prop_appearances=json.loads((root/'src/photo-props.json').read_text())
 # Blender Z up; glTF export automatically converts to web Y up.
 def position(v):return (v[0]*S,v[2]*S,-v[1]*S)
 def empty(name,parent=None,xyz=(0,0,0)):
@@ -71,23 +72,20 @@ for i,d in enumerate(json.loads((root/'src/character-definitions.json').read_tex
  hands={}
  for name,id,x in [('rightArm','3818',-15.552),('leftArm','3819',15.552)]:
   arm=empty(name,upper,position((x,9,0)));arm.rotation_euler.y=(1 if name=='rightArm' else -1)*math.radians(9.782);part(id,d['arm'],arm)
-  if name=='rightArm':
-   arm.rotation_mode='QUATERNION';arm.rotation_quaternion=Quaternion((1,0,0),-.65)@Quaternion((0,1,0),math.radians(9.782))
+  kind='pole'if name=='rightArm'else('mug'if i==0 else'iceCream')
+  arm.rotation_mode='QUATERNION';arm.rotation_quaternion=Quaternion((1,0,0),prop_appearances[kind]['carryShoulder'])@Quaternion((0,1,0),(1 if name=='rightArm'else -1)*math.radians(9.782))
   hand=empty('hand',arm,position((-5 if name=='rightArm' else 5,20,-10)));hand.rotation_euler.x=math.pi/4;part('3820',d['skin'],hand);hands[name]=hand
  head=empty('head',upper,position((0,-24,0)));part(d['headPart'],d['skin'],head)
  hair=empty('hair',upper,position((0,-24,0)));part(d['hairPart'],d['hair'],hair)
  for hand_name,kind in [('rightArm','pole'),('leftArm','mug' if i==0 else 'iceCream')]:
   socket=empty('photo_grip_'+hand_name,hands[hand_name],position((0,-.8229,-9.8948)))
   socket['source']='LDraw 3820 !HELP grip centre';socket['lifecycle']='Web: drop once per complete activity, return and pick up after finish/cancel'
-  if kind=='pole':
-   socket.rotation_euler.x=math.radians(19.5)
-   model=empty('pole_offset',socket,position((0,-8,0)));part('90540','#758b7d',model)
+  appearance=prop_appearances[kind]
+  if kind=='pole':socket.rotation_euler.x=math.radians(appearance['gripTiltDegrees'])
   else:
    bpy.context.view_layer.update();socket.rotation_mode='QUATERNION';socket.rotation_quaternion=hands[hand_name].matrix_world.to_quaternion().inverted()@rig.matrix_world.to_quaternion()
-   if kind=='mug':
-    model=empty('mug_handle_offset',socket,position((0,-11,-20)));part('3899','#8a9295',model)
-   else:
-    part('33120','#d9bb7b',socket);scoops=empty('ice_cream_offset',socket,position((0,-42,0)));part('6254','#ed951f',scoops)
+  for spec in appearance['parts']:
+   model=empty(kind+'_grip_offset',socket,position(spec['offset']));part(spec['id'],spec['color'],model)
 bpy.ops.wm.save_as_mainfile(filepath=str(root/'assets/characters.blend'))
 bpy.ops.export_scene.gltf(filepath=str(root/'public/models/characters.glb'),export_format='GLB',export_yup=True)
 print('Saved editable standard-part characters and GLB')

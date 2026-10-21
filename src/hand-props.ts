@@ -1,6 +1,7 @@
 import * as T from 'three';
 import * as C from 'cannon-es';
 import type {SlotId} from './characters';
+import appearances from './photo-props.json' with {type:'json'};
 
 export type PropActor={root:T.Group;parts:Record<SlotId,T.Group>;waist:T.Group;x:number;z:number;heading:number};
 type Hand='rightArm'|'leftArm';
@@ -34,17 +35,13 @@ export class HandProps{
   const ground=new C.Body({mass:0,shape:new C.Plane(),collisionFilterGroup:1});ground.quaternion.setFromEuler(-Math.PI/2,0,0);ground.position.y=-.29;this.world.addBody(ground);
   const add=(actor:number,hand:Hand,kind:PropKind)=>{
    const visual=new T.Group();visual.name=`photo-prop-${actor}-${kind}`;
-   if(kind==='pole'){
-    const pole=makePart('90540','#758b7d');pole.position.y=8*S;visual.add(pole);
-   }else if(kind==='mug'){
-    // 3899's vertical handle is centred at LDraw (0, 11, 20).
-    const mug=makePart('3899','#8a9295');mug.position.set(0,11*S,20*S);visual.add(mug);
-   }else{
-    const cone=makePart('33120','#d9bb7b'),scoops=makePart('6254','#ed951f');scoops.position.y=42*S;visual.add(cone,scoops);
-   }
+   const appearance=appearances[kind];
+   // All accessories share the figure's standard LDraw units. 33120 already
+   // includes its ice cream; adding 6254 made an incorrect extra tower.
+   for(const spec of appearance.parts){const model=makePart(spec.id,spec.color),[x,y,z]=spec.offset;model.position.set(x*S,-y*S,-z*S);visual.add(model);}
    const box=new T.Box3().setFromObject(visual),socket=new T.Group();socket.name=`photo-grip-${actor}-${hand}`;socket.position.copy(gripPoint);
    // Nominal hand axis is 14.5°; a carrying tilt clears the studs at full stride.
-   if(kind==='pole')socket.rotation.x=T.MathUtils.degToRad(19.5);
+   socket.rotation.x=T.MathUtils.degToRad(appearance.gripTiltDegrees);
    const item:Prop={kind,actor,hand,visual,socket,center:box.getCenter(new T.Vector3()),half:box.getSize(new T.Vector3()).multiplyScalar(.5),held:false,pickupFrom:new T.Vector3(),pickupRotation:new T.Quaternion()};
    visual.userData.photoProp=kind;this.items.push(item);
   };
@@ -106,9 +103,9 @@ export class HandProps{
   if(!this.active)return;
   if(!this.recovering&&this.items.every(p=>p.held)){
    this.carryBlend=Math.min(1,this.carryBlend+dt/.65);const k=smooth(this.carryBlend);
-   // A raised, quieter shoulder carries the standard pole beside the body.
+   // Quieter shoulders hold the cup near the waist/chest and keep poles clear.
    // Ease into it after pickup rather than snapping the newly held item.
-   for(const f of this.actors){const arm=f.parts.rightArm;arm.rotation.x=T.MathUtils.lerp(arm.rotation.x,-.65+arm.rotation.x*.35,k);}
+   for(const p of this.items){const arm=this.actors[p.actor].parts[p.hand];arm.rotation.x=T.MathUtils.lerp(arm.rotation.x,appearances[p.kind].carryShoulder+arm.rotation.x*.35,k);}
   }
   this.world.step(1/60,dt,4);
   for(const p of this.items)if(p.body){

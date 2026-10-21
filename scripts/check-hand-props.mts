@@ -18,6 +18,10 @@ props.equip();props.updatePhysics(1/60);
 assert(props.snapshot.held===4,'All four held props missing');
 const heldBounds=[];
 for(let n=0;n<120;n++){actors.forEach(f=>{f.parts.rightArm.rotation.x=-Math.sin(n/120*Math.PI*2)*.3;f.parts.leftArm.rotation.x=Math.sin(n/120*Math.PI*2)*.3;});props.updatePhysics(1/60);for(const p of props.snapshot.items){const o=scene.getObjectByName(`photo-prop-${p.actor}-${p.kind}`),b=new T.Box3().setFromObject(o);if(n===0)heldBounds.push({actor:p.actor,kind:p.kind,min:b.min.toArray(),max:b.max.toArray()});assert(b.min.y>.075,`Held ${p.kind} crosses floor: ${b.min.y}`);assert(Math.hypot(...p.position.map((v,j)=>v-p.grip[j]))<1e-6,'Grip not matched');}}
+const iceCream=scene.getObjectByName('photo-prop-1-iceCream');
+assert(iceCream.children.length===1,'33120 already includes ice cream; do not stack another scoop');
+assert(Math.abs(new T.Box3().setFromObject(iceCream).getSize(new T.Vector3()).y-52.2*.035)<1e-5,'Ice cream lost its standard part dimensions');
+assert(props.snapshot.items.find(p=>p.kind==='mug').grip[1]>1.6,'Cup is carried too low at the legs');
 neutral();props.updatePhysics(1/60);props.drop();const origins=props.snapshot.origins.map(r=>r.position);
 actors[0].x=-.5;actors[0].z=3;actors[1].x=.5;actors[1].z=3;rootSync();
 for(let n=0;n<360;n++)props.updatePhysics(1/60);

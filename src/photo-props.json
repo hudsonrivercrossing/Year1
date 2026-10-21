@@ -1,0 +1,17 @@
+{
+  "pole": {
+    "parts": [{"id": "90540", "color": "#758b7d", "offset": [0, -8, 0]}],
+    "gripTiltDegrees": 19.5,
+    "carryShoulder": -0.65
+  },
+  "mug": {
+    "parts": [{"id": "3899", "color": "#8a9295", "offset": [0, -11, -20]}],
+    "gripTiltDegrees": 0,
+    "carryShoulder": -0.5
+  },
+  "iceCream": {
+    "parts": [{"id": "33120", "color": "#ed951f", "offset": [0, 0, 0]}],
+    "gripTiltDegrees": 0,
+    "carryShoulder": -0.12
+  }
+}
