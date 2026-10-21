@@ -1,5 +1,6 @@
 {
   "id": "yw-long-bangs-approx",
+  "revision": 2,
   "source": "Original procedural project geometry",
   "generator": "scripts/prepare_yw_hair.py",
   "officialLDraw": false,
@@ -7,6 +8,6 @@
     "https://www.bricklink.com/v2/catalog/catalogitem.page?P=17346",
     "https://www.bricklink.com/v2/catalog/catalogitem.page?P=75867"
   ],
-  "description": "Visual long-straight-bangs approximation on the nominal standard minifig head origin. Neither exact mold nor soft/hard material variant is confirmed. No third-party mesh used; not a manufacturing model.",
-  "triangles": 3690
+  "description": "Photo-guided visual approximation: lower crown, connected heavy fringe and continuous face-framing side curtains, shoulder clearances and shorter curved ends and subtle molded strand channels. Neither exact mold nor material variant is confirmed; no third-party mesh used; not a manufacturing model.",
+  "triangles": 5194
 }

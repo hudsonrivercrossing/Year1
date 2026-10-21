@@ -29,6 +29,7 @@
     "hairCatalog": "17346 / 75867",
     "hairConfidence": "original visual approximation; exact asset pending",
     "headCatalog": "3626pb1352",
-    "headConfidence": "front-face family matches; 1352 vs 2662 reverse face cannot be distinguished"
+    "headConfidence": "front-face family matches; 1352 vs 2662 reverse face cannot be distinguished",
+    "hairRevision": 2
   }
 ]

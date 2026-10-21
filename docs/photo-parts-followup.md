@@ -39,7 +39,7 @@ RGB 采用本轮实际使用的官方库配置 `public/ldraw-source/LDConfig.ldr
 
 本轮逐文件检查[官方完整库](https://library.ldraw.org/library/updates/complete.zip)及新下载的[未发布件库](https://library.ldraw.org/library/unofficial/ldrawunf.zip)：二者均无 `17346.dat`、`75867.dat`，也未发现对应模具关键词映射。LDraw 论坛的[该发型请求](https://forums.ldraw.org/thread-28454-post-55288.html)提到未清理的 LDD 导出来源；这不能替代已核对许可的正式模型，因此没有直接移用来源不清的下载文件。
 
-原创近似由 `scripts/prepare_yw_hair.py` 生成，仅使用程序几何：空心顶盖、平刘海、两条扁长前发束和后帘，保留名义人仔头原点。它不调用或描摹第三方网格。前发束在标准躯干前表面之外，后帘在头以下收向背面，避免穿过躯干；眉眼前方留空。几何不是打印或制造模型。
+原创近似由 `scripts/prepare_yw_hair.py` 生成，保留名义人仔头原点；不调用或描摹第三方网格。第二版按照片修正轮廓：降低头顶体积，把两条分离发束替换成与顶盖相连的侧发壳，保留齐刘海和眉眼净空；发尾由约 42 LDU 缩短至 36 LDU，并在肩部抬高、前后垂落。内外壁在颈部以下按标准躯干轮廓留出间隙，表面加入浅发丝凹纹。当前 5,194 个三角面，仍为原创视觉近似，不是精确官方件或制造模型。
 
 `public/models/yw-long-bangs-approx.meta.json` 与 `public/models/manifest.json` 明确标记原创近似。Blender 属性也不把它署为 LDraw 官方件。`prepare_parts.py` 末尾会调用生成脚本，保证可重复构建。
 
