@@ -5,10 +5,11 @@
 - 发布日期：2026-10-21。
 - 发布状态：Sites 原生操作返回 `succeeded`。
 - 项目 ID：`appgprj_6ad83efe21fc8191b7860f21faf541e8`。
-- 部署 ID：`appgdep_6ad8b53f5e0c819189152fa4568a9657`。
-- 版本 ID：`appgprj_6ad83efe21fc8191b7860f21faf541e8~appgver_3285cdd791b4819193d6d72e1dafa9d0`。
-- 对应本地功能提交：`1742337`，`v1.0.0` 标签仍指向 `7534e3f`，保持不变。
-- Sites 源码提交：`20eeabc0435aae529d1e52dca0e707ad616e2c56`。
+- 部署 ID：`appgdep_6ad8b84df6388191a94df51d8c0c8e0e`。
+- 版本 ID：`appgprj_6ad83efe21fc8191b7860f21faf541e8~appgver_f67dc2f691a481919a2fdcc8e3cd30d5`。
+- 对应本地功能提交：`02fa3b1`（YW 发型第二版）；布局与动作提交 `1742337`。`v1.0.0` 标签保持不变。
+- Sites 源码提交：`c63884788f0e8db8ee3f027163dca4cb8561e7a7`。
+- 本次增量：YW 一体式齐刘海侧发、肩胸长度发尾与版本缓存标记。
 - 本轮内容：手机工作台布局、照片部件与配色、六个新动作、两条新组合、四件手持物的放落/返回拾取；[验收记录](mobile-actions-validation.md)。
 - 发布构建与本地生产构建的 145 个文件逐一 SHA256 一致。
 
