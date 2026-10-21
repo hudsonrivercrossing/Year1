@@ -5,11 +5,11 @@
 - 发布日期：2026-10-21。
 - 发布状态：Sites 原生操作返回 `succeeded`。
 - 项目 ID：`appgprj_6ad83efe21fc8191b7860f21faf541e8`。
-- 部署 ID：`appgdep_6ad8b84df6388191a94df51d8c0c8e0e`。
-- 版本 ID：`appgprj_6ad83efe21fc8191b7860f21faf541e8~appgver_f67dc2f691a481919a2fdcc8e3cd30d5`。
-- 对应本地功能提交：`02fa3b1`（YW 发型第二版）；布局与动作提交 `1742337`。`v1.0.0` 标签保持不变。
-- Sites 源码提交：`c63884788f0e8db8ee3f027163dca4cb8561e7a7`。
-- 本次增量：YW 一体式齐刘海侧发、肩胸长度发尾与版本缓存标记。
+- 部署 ID：`appgdep_6ad8b9a526c48191ad459f69bb46fbf4`。
+- 版本 ID：`appgprj_6ad83efe21fc8191b7860f21faf541e8~appgver_62a7c26bab3c819188c407570307bcf3`。
+- 对应本地功能提交：`5ebe770`（DJ 白髋与窄腰线）；YW 发型第二版 `02fa3b1`；布局与动作 `1742337`。`v1.0.0` 标签保持不变。
+- Sites 源码提交：`fc3111defa5c164a5abe13a555d71ea84fb6f0bb`。
+- 本次增量：DJ 改为白色髋部，顶部保留窄深色腰线，去掉整块黑色裆部；Blender 与 GLB 同步。
 - 本轮内容：手机工作台布局、照片部件与配色、六个新动作、两条新组合、四件手持物的放落/返回拾取；[验收记录](mobile-actions-validation.md)。
 - 发布构建与本地生产构建的 145 个文件逐一 SHA256 一致。
 
