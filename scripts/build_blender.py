@@ -55,11 +55,17 @@ def shirt_print(name,parent):
   m.node_tree.links.new(texture.outputs['Color'],shader.inputs['Base Color'])
   mesh.materials.append(m);obj=bpy.data.objects.new(name+'_'+side,mesh);bpy.context.collection.objects.link(obj);obj.parent=parent
   obj['source']='Original procedural print redraw; see public/textures/README.md'
+def waist_print(spec,parent):
+ x=18.025;z=10.025;h=spec['height']
+ faces=[[(-x,0,-z),(-x,h,-z),(x,h,-z),(x,0,-z)],[(x,0,z),(x,h,z),(-x,h,z),(-x,0,z)],[(-x,0,z),(-x,h,z),(-x,h,-z),(-x,0,-z)],[(x,0,-z),(x,h,-z),(x,h,z),(x,0,z)]]
+ mesh=bpy.data.meshes.new('narrow_waist_print');mesh.from_pydata([position(v)for face in faces for v in face],[],[tuple(range(i,i+4))for i in range(0,16,4)]);mesh.update();ink=material(spec['color']).copy();ink.name='waist_print_ink';ink.node_tree.nodes.get('Principled BSDF').inputs['Roughness'].default_value=.42;mesh.materials.append(ink)
+ obj=bpy.data.objects.new('Original_narrow_waist_print',mesh);bpy.context.collection.objects.link(obj);obj.parent=parent;obj['source']='Original replaceable surface print on standard 3815 hips, not a separate structural part'
 for i,d in enumerate(json.loads((root/'src/character-definitions.json').read_text())):
  rig=empty(d['name'],xyz=(-2 if i==0 else 2,0,72*S));rig['units']='LDraw units converted at 0.035 scene units/LDU'
  waist=empty('waist',rig,position((0,32,0)));upper=empty('upper',waist,position((0,-32,0)))
  torso=empty('torso',upper);part('973',d['torso'],torso);shirt_print(d['shirtPrint'],torso)
  legs=empty('legs',rig,position((0,32,0)));part('3815',d['hips'],legs)
+ if d.get('waistBand'):waist_print(d['waistBand'],legs)
  for id,x in [('3816',-10),('3817',10)]:
   pivot=empty('hip_'+id,legs,position((x,12,0)));shape=empty('leg_shape',pivot,position((-x,0,0)));part(id,d['legs'],shape)
  hands={}

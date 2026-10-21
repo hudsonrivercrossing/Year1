@@ -12,6 +12,7 @@ import {loadShirtPrints,shirtPrint} from './shirt-prints';
 import {ActionScene,headPose} from './affection';
 import {ACTIONS,SEQUENCES,LIBRARY_GROUPS,AUTO_ACTIONS,chooseFresh,type ActionId,type SequenceId} from './action-library';
 import {HandProps} from './hand-props';
+import {waistBand} from './waist-band';
 import {mergeVertices} from 'three/addons/utils/BufferGeometryUtils.js';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
@@ -48,7 +49,7 @@ function makeFigure(i:number):Figure{
  const waist=new T.Group(),upper=new T.Group();waist.position.y=-32*SCALE;upper.position.y=32*SCALE;waist.add(upper);root.add(waist);
  const parts={} as Record<SlotId,T.Group>;for(const slot of slots){parts[slot.id]=new T.Group();(slot.id==='legs'?root:upper).add(parts[slot.id]);parts[slot.id].visible=false;}
  parts.torso.add(part('973',def.torso),shirtPrint(def.shirtPrint,SCALE));
- parts.legs.position.copy(pos(0,32,0));parts.legs.add(part('3815',def.hips));
+ parts.legs.position.copy(pos(0,32,0));parts.legs.add(part('3815',def.hips));if(def.waistBand)parts.legs.add(waistBand(def.waistBand,SCALE));
  const legPivots:T.Group[]=[];
  for(const [id,x] of [['3816',-10],['3817',10]] as const){const pivot=new T.Group();pivot.position.copy(pos(x,12,0));const m=part(id,def.legs);m.position.copy(pos(-x,0,0));pivot.add(m);parts.legs.add(pivot);legPivots.push(pivot);}
  for(const [key,id,x] of [['rightArm','3818',-15.552],['leftArm','3819',15.552]] as const){const arm=parts[key];arm.position.copy(pos(x,9,0));arm.rotation.z=(key==='rightArm'?-1:1)*T.MathUtils.degToRad(9.782);arm.add(part(id,def.arm));const hand=part('3820',def.skin);hand.position.copy(pos(key==='rightArm'?-5:5,20,-10));hand.rotation.x=Math.PI/4;arm.add(hand);}

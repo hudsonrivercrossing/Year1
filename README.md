@@ -55,6 +55,8 @@ npm run dev
 
 `src/character-definitions.json` 定义配色、部件和置信度；`src/characters.ts` 定义拼装顺序；`src/action-library.ts` 定义动作阶段、参与者和时长；`src/affection.ts` 执行局部移动与姿态；`src/hand-props.ts` 管理握持、落地和拾取。长发颈部转动限幅，减少穿肩。坐姿按腿部几何最低点调整身体高度。换同类标准头发/头部沿用挂点；不同体型或非标准挂点仍需适配，当前没有换装 UI。
 
+DJ 的髋部与裤腿均为白色。窄深色腰线由 `src/waist-band.ts` 作为独立、可替换的表面层绘制，不把整块髋部或裆部涂黑，也不改变标准零件几何。
+
 网页使用本地预处理后的零件 JSON，运行时不访问 LDraw。`assets/characters.blend` 提供同一零件结构的可编辑源文件，`public/models/characters.glb` 是静态层级模型导出；当前网页不加载该 GLB，动作由网页关节程序生成。
 
 ## 复现素材

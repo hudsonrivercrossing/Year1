@@ -4,7 +4,7 @@
     "torso": "#9DC3F7",
     "arm": "#9DC3F7",
     "legs": "#F4F4F4",
-    "hips": "#1B2A34",
+    "hips": "#F4F4F4",
     "headPart": "3626cp8y",
     "shirtPrint": "dj-sweater",
     "shirtCatalog": "973pb5102c01",
@@ -12,7 +12,11 @@
     "hairPart": "99930",
     "skin": "#FAC80A",
     "hairCatalog": "99930",
-    "hairConfidence": "best visual match; mold not uniquely identifiable"
+    "hairConfidence": "best visual match; mold not uniquely identifiable",
+    "waistBand": {
+      "color": "#1B2A34",
+      "height": 3.2
+    }
   },
   {
     "name": "YW",
