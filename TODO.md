@@ -69,3 +69,4 @@
 本轮手机、动作、道具、音效和 Blender 验证见 [验收记录](docs/mobile-actions-validation.md)。
 
 - [x] 当前版本发布到 ChatGPT Sites，保留账号私有访问；[部署记录](docs/sites-deployment.md)。
+- [x] 本轮更新已发布成功，完整生产包通过验收；本地实现提交 1742337，v1.0.0 回溯点未移动。

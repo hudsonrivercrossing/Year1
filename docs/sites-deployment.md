@@ -5,10 +5,12 @@
 - 发布日期：2026-10-21。
 - 发布状态：Sites 原生操作返回 `succeeded`。
 - 项目 ID：`appgprj_6ad83efe21fc8191b7860f21faf541e8`。
-- 部署 ID：`appgdep_6ad83f628d1481919b620bb07cefc5dc`。
-- 版本 ID：`appgprj_6ad83efe21fc8191b7860f21faf541e8~appgver_149ff392ce2081918a2214d93cc59629`。
-- 对应本地功能提交：`97c8b45`，`v1.0.0` 标签保持不变。
-- Sites 源码提交：`51546931078a820076248b88b170908912dd5bb4`。
+- 部署 ID：`appgdep_6ad8b53f5e0c819189152fa4568a9657`。
+- 版本 ID：`appgprj_6ad83efe21fc8191b7860f21faf541e8~appgver_3285cdd791b4819193d6d72e1dafa9d0`。
+- 对应本地功能提交：`1742337`，`v1.0.0` 标签仍指向 `7534e3f`，保持不变。
+- Sites 源码提交：`20eeabc0435aae529d1e52dca0e707ad616e2c56`。
+- 本轮内容：手机工作台布局、照片部件与配色、六个新动作、两条新组合、四件手持物的放落/返回拾取；[验收记录](mobile-actions-validation.md)。
+- 发布构建与本地生产构建的 145 个文件逐一 SHA256 一致。
 
 ## 更新方式
 
