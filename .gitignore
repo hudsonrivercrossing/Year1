@@ -5,3 +5,6 @@ test-results/
 
 .playwright-cli/
 output/playwright/
+
+# Local catalog pages and visual comparisons used during parts research.
+output/research/
