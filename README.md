@@ -4,11 +4,9 @@
 
 > Experience the world together.
 
-一块一块，拼出我们。然后一起散步、跳舞、抱抱，把平常的一天过成小小的纪念。
+一块一块，拼出我们。
 
-*A little world for our first year together. Build us, bring us to life, and stay for a little dance.*
-
-**[走进我们的小世界 · Enter our little world ↗](https://hudsonrivercrossing.github.io/Year1/)**
+**[进入小世界 · Play ↗](https://hudsonrivercrossing.github.io/Year1/)**
 
 <p align="center">
   <img src="readme-assets/kiss.gif" alt="亲亲 · A little kiss" width="640">
@@ -18,19 +16,11 @@
   <img src="readme-assets/dance-front.gif" alt="跳舞 · A little dance" width="315">
 </p>
 
-## 从一份礼物开始
-
-最初是一幅装着两个人仔的纪念相框。现在，相框里的我们有了一个可以一起走走的小世界。
+## 最初的礼物
 
 <p align="center">
   <img src="readme-assets/anniversary-frame.png" alt="最初的实物纪念相框：DJ 与 YW，Experience the world together" width="420">
 </p>
-
-## 一起玩
-
-把散落的零件拼成 DJ 和 YW，或点「我太懒了」帮忙拼好。唤醒之后，陪他们漫步、牵手、亲脸颊，或跳一支舞。
-
-手机和电脑都可以玩，支持中英文。想更有气氛，就打开右上角的音乐。
 
 ## 两个人，十二块积木
 
