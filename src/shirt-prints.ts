@@ -1,3 +1,4 @@
+import {publicAsset} from './public-asset';
 import * as T from 'three';
 
 const prints=new Map<string,T.Texture>();
@@ -5,7 +6,7 @@ const prints=new Map<string,T.Texture>();
 export async function loadShirtPrints(names:string[]){
  const loader=new T.TextureLoader();
  await Promise.all([...new Set(names)].flatMap(name=>['front','back'].map(async side=>{
-  const texture=await loader.loadAsync(`/textures/${name}-${side}.png`);
+  const texture=await loader.loadAsync(publicAsset(`textures/${name}-${side}.png`));
   texture.colorSpace=T.SRGBColorSpace;texture.anisotropy=4;prints.set(`${name}-${side}`,texture);
  })));
 }

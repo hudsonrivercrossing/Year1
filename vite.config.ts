@@ -1,2 +1,9 @@
 import { defineConfig } from 'vite';
-export default defineConfig({build:{rollupOptions:{output:{manualChunks:{three:['three','three/addons/controls/OrbitControls.js']}}}}});
+
+export default defineConfig(({mode}) => ({
+ base: mode === 'pages' ? '/Year1/' : '/',
+ build: {
+  outDir: mode === 'pages' ? 'dist-pages' : 'dist',
+  rollupOptions: {output: {manualChunks: {three: ['three', 'three/addons/controls/OrbitControls.js']}}}
+ }
+}));

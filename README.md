@@ -2,7 +2,7 @@
 
 送给 DJ 与 YW 的一周年互动纪念礼物。主题来自照片中的 **Experience the world together**：一起，体验这个世界。
 
-参考照片：`assets/reference/anniversary-frame.png`。只保留 **1 year anniversary**。DJ 使用 99930 短侧梳发与圆框眼镜脸；YW 使用已核对映射的笑脸对照款和原创平刘海长发近似。两件上衣重绘正反面印花，配色分开配置。标准手持物已接入；发型精确模型与脸部背面型号的限制见 [本轮复核](docs/photo-parts-followup.md) 和 [TODO](TODO.md)。
+原始参考照片仅保留在本地，不上传 GitHub。只保留 **1 year anniversary**。DJ 使用 99930 短侧梳发与圆框眼镜脸；YW 使用已核对映射的笑脸对照款和原创平刘海长发近似。两件上衣重绘正反面印花，配色分开配置。标准手持物已接入；发型精确模型与脸部背面型号的限制见 [本轮复核](docs/photo-parts-followup.md) 和 [TODO](TODO.md)。
 
 ## 运行
 
@@ -14,6 +14,20 @@ npm run dev
 ```
 
 打开 http://127.0.0.1:5173 。生产构建：`npm run build`，预览构建：`npm run preview`。
+
+## GitHub Pages
+
+地址：https://hudsonrivercrossing.github.io/Year1/ 。`main` 的推送由 `.github/workflows/pages.yml` 自动构建并发布，无需手动上传 dist。
+
+```sh
+npm ci
+npm run build:pages
+npm run preview:pages
+```
+
+预览地址为 http://127.0.0.1:4173/Year1/ 。Pages 模式将脚本、模型、贴图、字体、音乐和署名链接统一放在 `/Year1/`；普通 `npm run build` 仍使用 `/`，供现有 ChatGPT Site 使用。
+
+公开历史保留 `v1.0.0` 和 TODO；原始照片、Blender 编辑文件、原始生成音频、研究输出及本地托管配置从所有公开提交中排除。原始本地仓库和标签不变；公开标签对应相同代码基线的清理副本，提交 SHA 不同。后续从私有源导出发布副本的方法见 [发布说明](docs/github-pages.md)。
 
 ## 体验
 
@@ -57,7 +71,7 @@ npm run dev
 
 DJ 的髋部与裤腿均为白色。窄深色腰线由 `src/waist-band.ts` 作为独立、可替换的表面层绘制，不把整块髋部或裆部涂黑，也不改变标准零件几何。
 
-网页使用本地预处理后的零件 JSON，运行时不访问 LDraw。`assets/characters.blend` 提供同一零件结构的可编辑源文件，`public/models/characters.glb` 是静态层级模型导出；当前网页不加载该 GLB，动作由网页关节程序生成。
+网页使用本地预处理后的零件 JSON，运行时不访问 LDraw。本地私有的 `assets/characters.blend` 提供同一零件结构的可编辑源文件（不在公开仓库中），`public/models/characters.glb` 是静态层级模型导出；当前网页不加载该 GLB，动作由网页关节程序生成。
 
 ## 复现素材
 
@@ -118,6 +132,6 @@ See `public/ldraw-source/CAreadme.txt` and the license files there. Derived geom
 
 - 上衣使用标准 `973` 几何，正反面采用原创重绘印花层：DJ 对照 `973pb5102c01`，YW 对照 `973pb3541c01`。这不是官方印花模型或目录照片贴图；后续可以独立替换。来源说明见 `public/textures/README.md`，重生成：`python3 scripts/prepare_portrait_prints.py`。
 - DJ 使用官方 LDraw `3626cp8y`，原作者与依赖子件保留在 `public/ldraw-source/`。`scripts/prepare_parts.py` 从同一库的 `LDConfig.ldr` 提取颜色值，浏览器与 Blender 共用 `src/ldraw-colors.json`，保证眼白、镜框和眉毛不被误画成黄色。
-- 可编辑的 `assets/characters.blend` 和 `public/models/characters.glb` 已同步外观；四张衣服贴图内嵌在文件中。运行时动作用 `src/affection.ts` 编排，未烘焙进静态 GLB。
+- 本地私有 Blender 源文件与公开运行资源 `public/models/characters.glb` 已同步外观；四张衣服贴图内嵌在文件中。运行时动作用 `src/affection.ts` 编排，未烘焙进静态 GLB。
 - 亲脸颊与羞羞配有低音量原创音效；每次动作只触发一次。亲脸颊在转头靠近后的停留阶段发声；音乐与音效仍可分别开关。
 - `scripts/check-portraits-affection.js` 检查新动作/组合、取消和复位、双语手机菜单、轻音效峰值及尾音；`scripts/check-free-assembly.js` 检查 12 块零件的真实拖拽拼装。

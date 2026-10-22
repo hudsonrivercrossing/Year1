@@ -8,3 +8,14 @@ output/playwright/
 
 # Local catalog pages and visual comparisons used during parts research.
 output/research/
+
+# Private local sources; excluded from the entire public export history.
+assets/
+output/
+.openai/
+dist-pages/
+.env
+.env.*
+!.env.example
+*.pem
+*.key

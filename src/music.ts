@@ -1,6 +1,7 @@
+import {publicAsset} from './public-asset';
 /** Background music only starts in a click gesture; it never autoplays on arrival. */
 export class AnniversaryMusic {
- readonly audio=new Audio('/audio/little-days.mp3');
+ readonly audio=new Audio(publicAsset('audio/little-days.mp3'));
  enabled=false;
  private fade?:number;
  constructor(){this.audio.loop=true;this.audio.preload='metadata';this.audio.volume=0;}
