@@ -15,7 +15,7 @@ export const ACTIONS:Record<ActionId,ActionSpec>={
  dance:{label:['一起跳舞','A little dance'],copy:['和你，平常的一天也值得庆祝。','An ordinary day is worth a dance with you.'],participants:[0,1],cue:'dance',phases:[{name:'gesture',duration:5.5}],exit:'stay'},
  kiss:{label:['亲脸颊','A cheek kiss'],copy:['偷偷，亲一下你的脸颊。','Just a little kiss on your cheek.'],participants:[0,1],cue:'kiss',phases:[{name:'approach',spacing:2.5,speed:1.5},{name:'turn',duration:.6,facing:'partner'},...pair(1.04,2.8)],exit:'separate'},
  shy:{label:['羞羞','Feeling shy'],copy:['一年了，还是会害羞。','A year together, and you still make me shy.'],participants:[0,1],cue:'shy',phases:pair(2.5,3.8),exit:'separate'},
- holdHands:{label:['牵牵手','Hold hands'],copy:['你的手，刚刚好。','Your hand fits right here.'],participants:[0,1],cue:'holdHands',phases:pair(1.48,3.8,'together'),exit:'separate'},
+ holdHands:{label:['牵牵手','Hold hands'],copy:['你的手，刚刚好。','Your hand fits right here.'],participants:[0,1],cue:'holdHands',phases:pair(2.05,3.8,'together'),exit:'separate'},
  highFive:{label:['击个掌','A high five'],copy:['我们真棒。','Look at us go.'],participants:[0,1],cue:'highFive',phases:pair(2.1,2.8,'together'),exit:'separate'},
  beckon:{label:['过来呀','Come closer'],copy:['来这边，留了位置给你。','Over here. I saved you a place.'],participants:[0],cue:'wave',phases:pair(2.8,2.8),exit:'separate'},
  look:{label:['一起看风景','Side by side'],copy:['不赶路，陪你看一会儿。','No hurry. Just this view, with you.'],participants:[0,1],cue:'look',phases:pair(1.48,4.5,'together'),exit:'separate'},

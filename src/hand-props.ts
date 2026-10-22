@@ -15,7 +15,8 @@ type Move=(actor:PropActor,x:number,z:number,dt:number,speed:number)=>number;
 type Walk=(actor:PropActor,amount:number,time:number)=>void;
 const S=.035;
 const smooth=(t:number)=>T.MathUtils.smoothstep(t,0,1);
-const gripPoint=new T.Vector3(0,.8229*S,9.8948*S);
+const [gx,gy,gz]=appearances.handGrip;
+const gripPoint=new T.Vector3(gx*S,-gy*S,-gz*S);
 
 /** Four removable accessories. They never enter the build-mode arm clones.
  * Their physical drop and walk-back/pickup share one lifecycle across a whole

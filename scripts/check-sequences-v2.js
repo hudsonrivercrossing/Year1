@@ -3,7 +3,7 @@ async page=>{
  if((await read()).autoInteractions){await page.locator('#moments summary').click();await page.locator('#surprises').click();await page.keyboard.press('Escape');}
  const results=[];
  for(const [recipe,expected]of [['together',['dance','holdHands','look']],['reunion',['stroll','wait','beckon','approach','hug']]]){
-  await page.locator('#moments summary').click();await page.locator('#'+recipe).click();const seen=[],deadline=Date.now()+100000;let recovering=false,switched=false,shot=false;
+  await page.locator('#moments summary').click();await page.locator('#library-tab-stories').click();await page.locator('#'+recipe).click();const seen=[],deadline=Date.now()+100000;let recovering=false,switched=false,shot=false;
   while(Date.now()<deadline){
    const s=await read();if(s.activity==='wander')break;
    if(s.activity==='recover'){recovering=true;assert(!s.sequence&&s.queue.length===0,'Queue not cleared before recovery');}

@@ -22,7 +22,6 @@ const status = (message: string) => { $('status').textContent = message; };
 const SCALE = .035;
 const WORLD = { width: 28, depth: 20, wanderX: 11.5, wanderZ: 8 };
 const phoneView=()=>window.matchMedia('(max-width:700px)').matches;
-const playCamera = () => phoneView()?new T.Vector3(4,16,28):new T.Vector3(14,20,35);
 let autoFraming=phoneView();
 const pos = (x: number,y: number,z: number) => new T.Vector3(x*SCALE,-y*SCALE,-z*SCALE);
 const scene = new T.Scene(); scene.background = new T.Color('#eee9df');
@@ -63,7 +62,7 @@ type Action=ActionId;
 let encounter:ActionScene|undefined;let props:HandProps|undefined;let queue:Action[]=[];let sweet=false;
 let sequence:SequenceId|undefined;let cancelling=false;let autoInteractions=localStorage.getItem('little-world-surprises')!=='off';let nextAuto=45+Math.random()*25;const recentActions:Action[]=[];const recentSequences:SequenceId[]=[];
 let count=0;let mode:'build'|'ready'|'awakening'|'play'='build';let activity:Action|'wander'|'recover'='wander';let activityTime=0;let elapsed=0;let transitionTime=0;let automatic=false;
-let hintsOn=localStorage.getItem('little-world-hints')!=='off';
+const hintsOn=true;
 const music=new AnniversaryMusic();
 const sounds=new SoundEffects();
 document.addEventListener('pointerdown',()=>sounds.unlock(),{capture:true,passive:true});
@@ -71,7 +70,15 @@ document.addEventListener('keydown',()=>sounds.unlock(),{capture:true});
 $('sound').onclick=()=>{sounds.toggle();renderCopy();};
 let assemblyMode:'free'|'guided'='free';
 let freeAssembly:FreeAssembly|undefined;
-const buildCamera=()=>{if(phoneView()){const d=Math.max(40,12/(Math.tan(T.MathUtils.degToRad(camera.fov/2))*camera.aspect));return new T.Vector3(.36,1,.03).normalize().multiplyScalar(d);}if(assemblyMode==='guided')return new T.Vector3(8,10,camera.aspect<.85?24:17);const distance=Math.max(43,17/(Math.tan(T.MathUtils.degToRad(camera.fov/2))*camera.aspect));return new T.Vector3(.12,.85,1).normalize().multiplyScalar(distance);};
+const buildCamera=()=>{if(phoneView()){const d=Math.max(40,12/(Math.tan(T.MathUtils.degToRad(camera.fov/2))*camera.aspect));return new T.Vector3(.56,1,.1).normalize().multiplyScalar(d);}if(assemblyMode==='guided')return new T.Vector3(8,10,camera.aspect<.85?24:17);const distance=Math.max(43,17/(Math.tan(T.MathUtils.degToRad(camera.fov/2))*camera.aspect));return new T.Vector3(.12,.85,1).normalize().multiplyScalar(distance);};
+// One mobile frame for awakening, follow and explicit reframe. A lower
+// elevation shows faces without losing the workbench and scattered pieces.
+function playView(){
+ if(!phoneView())return{position:new T.Vector3(14,20,35),target:new T.Vector3(0,1,0)};
+ const[a,b]=figures,target=new T.Vector3((a.x+b.x)/2,1.3,(a.z+b.z)/2);
+ const distance=Math.max(16,(Math.abs(a.x-b.x)+5)/(2*Math.tan(T.MathUtils.degToRad(camera.fov/2))*camera.aspect),(Math.abs(a.z-b.z)+5)*1.4);
+ return{target,position:target.clone().add(new T.Vector3(.1,.72,1).normalize().multiplyScalar(distance))};
+}
 function setBuildView(){camera.position.copy(buildCamera());controls.target.set(0,phoneView()?.4:1,0);controls.enabled=true;controls.enablePan=true;controls.enableZoom=true;controls.enableRotate=true;controls.mouseButtons.LEFT=T.MOUSE.ROTATE;controls.mouseButtons.RIGHT=T.MOUSE.PAN;controls.touches.ONE=T.TOUCH.ROTATE;controls.touches.TWO=T.TOUCH.DOLLY_PAN;pauseOrbitForPiece();controls.enabled=true;}
 function pauseOrbitForPiece(){
  const position=camera.position.clone(),target=controls.target.clone();
@@ -99,9 +106,6 @@ function renderCopy(){
  $('mode-free').textContent=t('自由拼装','Free build');$('mode-guided').innerHTML=`<span class="lazy-label">${t('我太懒了','I’m too lazy')}<sup class="sleep-mark" aria-hidden="true"><span>z</span><span>z</span><span>z</span></sup></span>`;
  $('name-0').textContent='DJ';$('name-1').textContent='YW';$('loading-label')?.replaceChildren(t('把小小的我们，摆上桌。','Setting out the pieces of us.'));
  $('navigation-tip').textContent=mode==='build'?t('拖空白处环绕 · 右键平移 · 滚轮或双指缩放','Drag empty space to orbit · Right-drag to pan · Scroll or pinch to zoom'):'';
- $('hint-toggle')?.setAttribute('aria-pressed',String(hintsOn));
- if($('hint-toggle'))$('hint-toggle').textContent=hintsOn?t('提示开','Hints on'):t('提示关','Hints off');
- if($('hint-toggle'))$('hint-toggle').title=t('拾起零件时，高亮对应部位','Highlight the matching part while holding a piece');
  if(freeAssembly)freeAssembly.hintsEnabled=hintsOn;
 }
 function activityStatus(){
@@ -109,15 +113,14 @@ function activityStatus(){
  if(activity==='recover'){status(t('先回去，把小东西捡起来。','Back for our little things.'));return;}
  status(activity==='wander'?'':t(...ACTIONS[activity].copy));
 }
-function fitView(){autoFraming=phoneView();if(mode==='build'||mode==='ready')setBuildView();else{camera.position.copy(playCamera());controls.target.set(0,1,0);controls.update();}}
+function fitView(){autoFraming=phoneView();if(mode==='build'||mode==='ready')setBuildView();else{const view=playView();camera.position.copy(view.position);controls.target.copy(view.target);controls.update();}}
 const fitButton=()=>`<button id="fit" class="mobile-only fit-control" aria-label="${t('重新取景','Frame the workbench')}" title="${t('重新取景','Frame the workbench')}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4H4v4m12-4h4v4M4 16v4h4m12-4v4h-4M9 12h6m-3-3v6"/></svg></button>`;
 
 
 function disposeClone(group:T.Group|undefined){if(!group)return;scene.remove(group);group.traverse(obj=>{if(obj instanceof T.Mesh){const mats=Array.isArray(obj.material)?obj.material:[obj.material];for(const mat of mats)mat.dispose();}});}
 function cloneIndependent(source:T.Group){const clone=source.clone(true);clone.visible=true;clone.traverse(o=>{if(o instanceof T.Mesh){o.material=(o.material as T.Material).clone();}});return clone;}
 function freeTools(){
- $('tools').innerHTML=`<button id="hint-toggle" aria-pressed="${hintsOn}"></button><div class="assist-group" id="assist-group"><button id="build-assist-toggle" class="mobile-only" aria-expanded="false">${t('帮我一下','A little help')}</button><div class="assist-options"><button id="hint" class="hint-helper">${t('下一块提示','A little hint')}</button><button id="connect" class="hint-helper">${t('装上这一块 ↵','Place this piece ↵')}</button><button id="scatter">${t('再散开一次','Scatter again')}</button></div></div>${fitButton()}`;
- $('hint-toggle').onclick=()=>{hintsOn=!hintsOn;localStorage.setItem('little-world-hints',hintsOn?'on':'off');renderCopy();status('');};
+ $('tools').innerHTML=`<div class="assist-group" id="assist-group"><button id="build-assist-toggle" class="mobile-only" aria-expanded="false" aria-controls="assist-options">${t('帮我一下','A little help')}<svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 10 4-4 4 4"/></svg></button><div class="assist-options" id="assist-options"><button id="hint" class="hint-helper">${t('下一块提示','A little hint')}</button><button id="connect" class="hint-helper">${t('装上这一块','Place this piece')}</button><button id="scatter">${t('再散开一次','Scatter again')}</button></div></div>${fitButton()}`;
  $('hint').onclick=()=>{freeAssembly?.hint();refreshFreeButton();};
  $('connect').onclick=()=>{const p=freeAssembly?.selected;if(p&&freeAssembly?.eligible(p))freeAssembly.connect(p);};
  $('scatter').onclick=()=>{freeAssembly?.scatter();status('');};
@@ -140,7 +143,7 @@ function showNext(){
  ghost=cloneIndependent(source);source.getWorldPosition(ghost.position);source.getWorldQuaternion(ghost.quaternion);ghost.traverse(obj=>{if(obj instanceof T.Mesh){if(obj.userData.print)obj.visible=false;obj.material=new T.MeshStandardMaterial({color:i===0?'#64869d':'#9a7058',transparent:true,opacity:.2,depthWrite:false,side:T.DoubleSide});obj.castShadow=false;}});scene.add(ghost);
  tray=cloneIndependent(source);tray.position.set(0,1.25,2.9);tray.rotation.set(0,-.15,0);scene.add(tray);trayHome.copy(tray.position);
  guidedStatus();
- $('tools').innerHTML=`<button class="primary" id="attach">${t('装上这一块 ↵','Place this piece ↵')}</button><button id="auto">${t('自动拼装','Build for me')}</button>`;renderCopy();
+ $('tools').innerHTML=`<button class="primary" id="attach">${t('装上这一块','Place this piece')}</button><button id="auto">${t('自动拼装','Build for me')}</button>`;renderCopy();
  $('attach').onclick=attach;$('auto').onclick=()=>{automatic=true;autoBuild();};
 }
 let autoTimer:ReturnType<typeof setTimeout>|undefined;
@@ -162,23 +165,33 @@ const actionIcon=(name:'wave'|'hug'|'dance'|'reset'|'moments')=>{
  };
  return `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[name]}</svg>`;
 };
-function closeLibrary(){const menu=$('moments') as HTMLDetailsElement;if(menu)menu.open=false;}
+let libraryTab:'affection'|'together'|'stories'='affection';
+function closeLibrary(focus=false){const menu=$('moments') as HTMLDetailsElement;if(menu){const wasOpen=menu.open;menu.open=false;if(focus&&wasOpen)menu.querySelector('summary')?.focus();}}
+function selectLibraryTab(tab:typeof libraryTab,focus=false){
+ libraryTab=tab;
+ for(const id of ['affection','together','stories'] as const){const selected=id===tab,button=$('library-tab-'+id);button.setAttribute('aria-selected',String(selected));button.tabIndex=selected?0:-1;$('library-panel-'+id).hidden=!selected;if(selected&&focus)button.focus();}
+}
 function playTools(){
- const groups=LIBRARY_GROUPS.map(group=>`<section class="library-group"><p>${t(...group.label)}</p><div>${group.actions.map(id=>`<button id="${id}" data-action="${id}">${t(...ACTIONS[id].label)}</button>`).join('')}</div></section>`).join('');
+ const actions=(ids:readonly Action[])=>ids.map(id=>`<button id="${id==='wave'||id==='dance'?'library-'+id:id}" data-action="${id}">${t(...ACTIONS[id].label)}</button>`).join('');
  const recipes=Object.entries(SEQUENCES).map(([id,recipe])=>`<button id="${id}" data-sequence="${id}">${t(...recipe.label)}</button>`).join('');
- $('tools').innerHTML=`<button class="action quick-action" id="wave">${actionIcon('wave')}<span>${t(...ACTIONS.wave.label)}</span></button><button class="action" id="hug">${actionIcon('hug')}<span>${t(...ACTIONS.hug.label)}</span></button><button class="action quick-action" id="dance">${actionIcon('dance')}<span>${t(...ACTIONS.dance.label)}</span></button><details class="moments" id="moments"><summary>${actionIcon('moments')}<span class="moments-label-long">${t('小小心动','Little moments')}</span><span class="moments-label-short">${t('小小心动','Moments')}</span></summary><div class="moments-list"><section class="library-group mobile-only"><p>${t('打个招呼，跳支舞','Hello, and a little dance')}</p><div><button id="library-wave" data-action="wave">${t(...ACTIONS.wave.label)}</button><button id="library-dance" data-action="dance">${t(...ACTIONS.dance.label)}</button></div></section>${groups}<section class="library-group recipes"><p>${t('一小段，属于我们','A little story of us')}</p><div>${recipes}<button id="surprise">${t('随心来一段','Surprise us')}</button></div></section><button id="surprises" class="surprises-toggle" aria-pressed="${autoInteractions}">${t('偶尔的小互动','Little surprises')} <span>${autoInteractions?t('开','on'):t('关','off')}</span></button><button id="rebuild-menu" class="mobile-only">${t('再拼一次','Build again')}</button></div></details><button class="rebuild" id="stop" hidden>${t('先歇一会','A little pause')}</button>${fitButton()}<button class="rebuild desktop-rebuild" id="reset">${actionIcon('reset')}<span>${t('再拼一次','Build again')}</span></button>`;
- for(const id of ['wave','hug','dance'] as const)$(id).onclick=()=>{closeLibrary();startActivity(id);};
- $('tools').querySelectorAll<HTMLButtonElement>('[data-action]').forEach(button=>button.onclick=()=>{closeLibrary();startActivity(button.dataset.action as Action);});
- $('tools').querySelectorAll<HTMLButtonElement>('[data-sequence]').forEach(button=>button.onclick=()=>{closeLibrary();startSequence(button.dataset.sequence as SequenceId);});
- $('surprise').onclick=()=>{closeLibrary();startSequence(chooseFresh(Object.keys(SEQUENCES) as SequenceId[],recentSequences,2)??'sweet');};
- $('surprises').onclick=()=>{autoInteractions=!autoInteractions;localStorage.setItem('little-world-surprises',autoInteractions?'on':'off');const open=($('moments') as HTMLDetailsElement).open;playTools();($('moments') as HTMLDetailsElement).open=open;};
+ const tabs=[['affection',t('心动','Affection')],['together',t('陪伴','Together')],['stories',t('组合','Stories')]] as const;
+ const panels=tabs.map(([id])=>`<section id="library-panel-${id}" class="library-group ${id==='stories'?'recipes':''}" role="tabpanel" aria-labelledby="library-tab-${id}" ${libraryTab===id?'':'hidden'}><div>${id==='affection'?actions(LIBRARY_GROUPS[0].actions):id==='together'?actions(['wave','dance',...LIBRARY_GROUPS[1].actions]):recipes+`<button id="surprise">${t('随心来一段','Surprise us')}</button>`}</div></section>`).join('');
+ $('tools').innerHTML=`<button class="action quick-action" id="wave">${actionIcon('wave')}<span>${t(...ACTIONS.wave.label)}</span></button><button class="action" id="hug">${actionIcon('hug')}<span>${t(...ACTIONS.hug.label)}</span></button><button class="action quick-action" id="dance">${actionIcon('dance')}<span>${t(...ACTIONS.dance.label)}</span></button><details class="moments" id="moments"><summary>${actionIcon('moments')}<span class="moments-label-long">${t('更多动作','More moments')}</span><span class="moments-label-short">${t('更多动作','Moments')}</span><svg class="menu-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 10 4-4 4 4"/></svg></summary><div class="moments-list" role="region" aria-label="${t('选择一个小互动','Choose a little moment')}"><header class="library-heading"><h2>${t('想做点什么？','What shall we do?')}</h2><button id="library-close" class="library-close" aria-label="${t('收起动作','Close actions')}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17"/></svg></button></header><div id="library-tabs" class="library-tabs" role="tablist" aria-label="${t('动作类型','Kinds of moments')}">${tabs.map(([id,label])=>`<button id="library-tab-${id}" role="tab" aria-selected="${libraryTab===id}" aria-controls="library-panel-${id}" tabindex="${libraryTab===id?0:-1}">${label}</button>`).join('')}</div>${panels}<footer class="library-footer"><button id="surprises" class="surprises-toggle" role="switch" aria-checked="${autoInteractions}"><span>${t('偶尔的小互动','Little surprises')}</span><span class="switch-track" aria-hidden="true"></span></button><button id="rebuild-menu" class="mobile-only">${actionIcon('reset')}<span>${t('再拼一次','Build again')}</span></button></footer></div></details><button class="rebuild" id="stop" hidden>${t('先歇一会','A little pause')}</button>${fitButton()}<button class="rebuild desktop-rebuild" id="reset">${actionIcon('reset')}<span>${t('再拼一次','Build again')}</span></button>`;
+ for(const [id]of tabs)$('library-tab-'+id).onclick=()=>selectLibraryTab(id);
+ $('library-tabs').onkeydown=e=>{const keys=['ArrowLeft','ArrowRight','Home','End'];if(!keys.includes(e.key))return;e.preventDefault();e.stopPropagation();const focused=tabs.findIndex(([id])=>'library-tab-'+id===(e.target as HTMLElement).id),i=focused<0?tabs.findIndex(([id])=>id===libraryTab):focused,next=e.key==='Home'?0:e.key==='End'?2:(i+(e.key==='ArrowRight'?1:2))%3;selectLibraryTab(tabs[next][0],true);};
+ $('library-close').onclick=()=>closeLibrary(true);
+ for(const id of ['wave','hug','dance'] as const)$(id).onclick=()=>{closeLibrary(true);startActivity(id);};
+ $('tools').querySelectorAll<HTMLButtonElement>('[data-action]').forEach(button=>button.onclick=()=>{closeLibrary(true);startActivity(button.dataset.action as Action);});
+ $('tools').querySelectorAll<HTMLButtonElement>('[data-sequence]').forEach(button=>button.onclick=()=>{closeLibrary(true);startSequence(button.dataset.sequence as SequenceId);});
+ $('surprise').onclick=()=>{closeLibrary(true);startSequence(chooseFresh(Object.keys(SEQUENCES) as SequenceId[],recentSequences,2)??'sweet');};
+ $('surprises').onclick=()=>{autoInteractions=!autoInteractions;localStorage.setItem('little-world-surprises',autoInteractions?'on':'off');$('surprises').setAttribute('aria-checked',String(autoInteractions));};
  $('stop').onclick=()=>{if(activity==='recover'||cancelling)return;queue=[];sweet=false;sequence=undefined;cancelling=true;encounter?.cancel();if(!encounter)finishActivity();activityStatus();actionControls();};
  $('reset').onclick=reset;$('rebuild-menu').onclick=reset;$('fit').onclick=fitView;renderCopy();actionControls();
 }
 function actionControls(){
  const busy=activity!=='wander';
  for(const button of Array.from($('tools').querySelectorAll<HTMLButtonElement>('[data-action],[data-sequence],#wave,#hug,#dance,#surprise'))){button.disabled=busy;const id=button.dataset.action??button.dataset.sequence??button.id;button.setAttribute('aria-pressed',String(sequence?id===sequence:id===activity));}
- if($('stop')){$('stop').hidden=!busy;$<HTMLButtonElement>('stop').disabled=activity==='recover'||cancelling;$('stop').textContent=activity==='recover'?t('捡起小东西','Picking things up'):t('先歇一会','A little pause');}
+ if($('stop')){$('stop').hidden=!busy;$<HTMLButtonElement>('stop').disabled=activity==='recover'||cancelling;$('stop').textContent=activity==='recover'?t('捡起小东西','Picking up…'):t('先歇一会','A little pause');}
  $('moments')?.classList.toggle('active',busy);
 }
 function startActivity(a:Action){if(mode!=='play'||activity!=='wander')return;sequence=undefined;sweet=false;props?.drop();beginActivity(a);}
@@ -250,9 +263,9 @@ const clock=new T.Clock();
 function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta(),.05);elapsed+=dt;
  if(mode==='build'||mode==='ready'){if(tray&&!dragging)tray.rotation.y=-.15+Math.sin(elapsed*.8)*.12;}
  if(mode==='build')freeAssembly?.update(dt);
- if(mode==='awakening'){transitionTime+=dt;const k=Math.min(1,transitionTime/2.2),e=1-Math.pow(1-k,3);const end=playCamera();camera.position.copy(awakeningFrom).lerp(end,e);controls.target.copy(awakeningTarget).lerp(new T.Vector3(0,1,0),e);figures.forEach((f,i)=>{const from=awakeningActors[i];f.x=T.MathUtils.lerp(from.x,i===0?-2:2,e);f.z=T.MathUtils.lerp(from.z,0,e);f.heading=T.MathUtils.lerp(from.heading,0,e);f.root.position.set(f.x,72*SCALE,f.z);f.root.rotation.y=f.heading;f.parts.head.rotation.y=Math.sin(transitionTime*3+i)*.2;f.parts.hair.rotation.y=f.parts.head.rotation.y;f.parts.rightArm.rotation.x=-Math.sin(Math.min(transitionTime/2.2,1)*Math.PI)*.8;});if(k===1){mode='play';props?.equip();controls.enabled=true;controls.enableDamping=true;controls.enableRotate=true;controls.enableZoom=true;controls.enablePan=true;controls.mouseButtons.LEFT=T.MOUSE.ROTATE;controls.touches.ONE=T.TOUCH.ROTATE;activityStatus();playTools();renderCopy();}}
+ if(mode==='awakening'){transitionTime+=dt;const k=Math.min(1,transitionTime/2.2),e=1-Math.pow(1-k,3);const end=playView();camera.position.copy(awakeningFrom).lerp(end.position,e);controls.target.copy(awakeningTarget).lerp(end.target,e);figures.forEach((f,i)=>{const from=awakeningActors[i];f.x=T.MathUtils.lerp(from.x,i===0?-2:2,e);f.z=T.MathUtils.lerp(from.z,0,e);f.heading=T.MathUtils.lerp(from.heading,0,e);f.root.position.set(f.x,72*SCALE,f.z);f.root.rotation.y=f.heading;f.parts.head.rotation.y=Math.sin(transitionTime*3+i)*.2;f.parts.hair.rotation.y=f.parts.head.rotation.y;f.parts.rightArm.rotation.x=-Math.sin(Math.min(transitionTime/2.2,1)*Math.PI)*.8;});if(k===1){mode='play';props?.equip();controls.enabled=true;controls.enableDamping=true;controls.enableRotate=true;controls.enableZoom=true;controls.enablePan=true;controls.mouseButtons.LEFT=T.MOUSE.ROTATE;controls.touches.ONE=T.TOUCH.ROTATE;activityStatus();playTools();renderCopy();}}
  if(mode==='play')updateCharacters(dt);
- if(mode==='play'&&phoneView()&&autoFraming){const[a,b]=figures;const focus=new T.Vector3((a.x+b.x)/2,1.3,(a.z+b.z)/2);const distance=Math.max(16,(Math.abs(a.x-b.x)+5)/(2*Math.tan(T.MathUtils.degToRad(camera.fov/2))*camera.aspect),(Math.abs(a.z-b.z)+5)*1.4);const destination=focus.clone().add(new T.Vector3(.1,.95,1).normalize().multiplyScalar(distance));const alpha=1-Math.exp(-dt*1.8);camera.position.lerp(destination,alpha);controls.target.lerp(focus,alpha);}
+ if(mode==='play'&&phoneView()&&autoFraming){const view=playView(),alpha=1-Math.exp(-dt*1.8);camera.position.lerp(view.position,alpha);controls.target.lerp(view.target,alpha);}
  controls.update();
  for(let i=0;i<2;i++){if(!figures[i])continue;const p=figures[i].root.position.clone();p.y=0;p.z+=.9;p.project(camera);const r=$('scene').getBoundingClientRect();const label=$('name-'+i);label.style.left=`${r.left+(p.x*.5+.5)*r.width}px`;label.style.top=`${r.top+(-p.y*.5+.5)*r.height}px`;}
  renderer.render(scene,camera);
@@ -263,7 +276,12 @@ if(import.meta.env.DEV)Object.defineProperty(window,'__brickWorld',{get:()=>{
  const project=(v:T.Vector3)=>{const r=renderer.domElement.getBoundingClientRect();const p=v.clone().project(camera);return {x:r.left+(p.x*.5+.5)*r.width,y:r.top+(-p.y*.5+.5)*r.height};};
  return {mode,assemblyMode,count,activity,sequence,cancelling,action:encounter?.snapshot??null,props:props?.snapshot??null,recentActions:[...recentActions],autoInteractions,nextAuto,autoFraming,effects:scene.children.filter(o=>o.name==='affection-heart').length,encounter:encounter?.phase??null,queue:[...queue],sweet,hintsOn,language:getLanguage(),sounds:sounds.snapshot,guided:tray&&ghost?{piece:project(tray.position),target:project(ghost.position)}:null,camera:{position:camera.position.toArray(),target:controls.target.toArray(),azimuth:controls.getAzimuthalAngle(),polar:controls.getPolarAngle()},music:{enabled:music.enabled,paused:music.audio.paused,time:music.audio.currentTime,source:music.audio.currentSrc},world:WORLD,portraits:characters.map(d=>({head:d.headPart,hair:d.hairPart,skin:d.skin,legs:d.legs,hips:d.hips,shirt:d.shirtCatalog,print:d.shirtPrint})),figures:figures.map(f=>({waist:f.waist.rotation.toArray(),heightOffset:f.heightOffset,feetY:f.footHeight(f.legPivots[0].rotation.x)+f.heightOffset,legs:f.legPivots.map(p=>p.rotation.toArray()),screen:project(f.root.position),head:f.parts.head.rotation.toArray(),hair:f.parts.hair.rotation.toArray(),headPosition:f.parts.head.position.toArray(),hairPosition:f.parts.hair.position.toArray(),arms:[f.parts.rightArm.rotation.toArray(),f.parts.leftArm.rotation.toArray()],x:f.x,z:f.z,speed:f.speed,pause:f.pause,heading:f.heading,target:[f.target.x,f.target.y]})),pieces:freeAssembly?.pieces.map(p=>({character:p.character,slot:p.slot,attached:p.attached,held:p===freeAssembly?.holding,hintVisible:p.ghost.visible,highlighted:Boolean(p.ghost.userData.highlighted),eligible:freeAssembly!.eligible(p),position:p.visual.position.toArray(),velocity:p.body.velocity.toArray(),screen:project(p.visual.position),target:project(freeAssembly!.target(p))}))??[]};
 }});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeLibrary();$('assist-group')?.classList.remove('open');$('build-assist-toggle')?.setAttribute('aria-expanded','false');}});
+document.addEventListener('pointerdown',e=>{
+ if(!(e.target instanceof Node))return;
+ const menu=$('moments') as HTMLDetailsElement;if(menu?.open&&!menu.contains(e.target))closeLibrary();
+ const assist=$('assist-group');if(assist?.classList.contains('open')&&!assist.contains(e.target)){assist.classList.remove('open');$('build-assist-toggle')?.setAttribute('aria-expanded','false');}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeLibrary(true);$('assist-group')?.classList.remove('open');$('build-assist-toggle')?.setAttribute('aria-expanded','false');}});
 document.addEventListener('pointerdown',e=>{if(!(e.target instanceof Element))return;if(!e.target.closest('#moments'))closeLibrary();if(!e.target.closest('#assist-group')){$('assist-group')?.classList.remove('open');$('build-assist-toggle')?.setAttribute('aria-expanded','false');}});
 renderCopy();
 void boot();

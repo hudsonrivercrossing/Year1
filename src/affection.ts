@@ -1,6 +1,7 @@
 import * as T from 'three';
 import type {SlotId} from './characters';
 import type {SoundCue} from './sound-effects';
+import propData from './photo-props.json' with {type:'json'};
 import {ACTIONS,type ActionId,type Phase} from './action-library';
 export type Actor={root:T.Group;parts:Record<SlotId,T.Group>;waist:T.Group;legPivots:T.Group[];heightOffset:number;footHeight:(angle:number)=>number;x:number;z:number;heading:number};
 export function headPose(f:Pick<Actor,'parts'>,pitch=0,yaw=0,roll=0){
@@ -8,6 +9,9 @@ export function headPose(f:Pick<Actor,'parts'>,pitch=0,yaw=0,roll=0){
  const q=new T.Quaternion().setFromEuler(new T.Euler(pitch,yaw,roll));
  for(const slot of ['head','hair'] as const){f.parts[slot].quaternion.copy(q);f.parts[slot].position.set(0,.66,0).applyQuaternion(q).y+=.18;}
 }
+const [gx,gy,gz]=propData.handGrip;
+const gripPoint=new T.Vector3(gx*.035,-gy*.035,-gz*.035);
+type Hand='leftArm'|'rightArm';
 const ease=(t:number)=>T.MathUtils.smoothstep(t,0,1);
 const turn=(f:Actor,angle:number,dt:number)=>{f.heading+=Math.atan2(Math.sin(angle-f.heading),Math.cos(angle-f.heading))*(1-Math.exp(-8*dt));};
 const heartTexture=()=>{
@@ -34,7 +38,20 @@ export class ActionScene{
   this.heart=new T.Sprite(new T.SpriteMaterial({map:heartTexture(),transparent:true,opacity:0,depthWrite:false}));this.heart.name='affection-heart';this.heart.scale.setScalar(.34);scene.add(this.heart);
  }
  get phase(){return this.done?'done':this.cancelled?'release':this.stages[this.index]?.name??'done';}
- get snapshot(){return {id:this.kind,phase:this.phase,stage:this.index,time:this.time,participants:ACTIONS[this.kind].participants};}
+ get snapshot(){return {id:this.kind,phase:this.phase,stage:this.index,time:this.time,participants:ACTIONS[this.kind].participants,contact:this.kind==='holdHands'||this.kind==='highFive'?{hands:this.contactPoints().map(v=>v.toArray()),distance:this.contactDistance()}:undefined};}
+ private contactPoints(){const side=this.handSide;return this.actors.map((f,i)=>f.parts[(i===0)===(side===1)?'leftArm':'rightArm'].children[1].localToWorld(gripPoint.clone()));}
+ private contactDistance(){const[a,b]=this.contactPoints();return a.distanceTo(b);}
+ private meetHands(f:Actor,hand:Hand,k:number,raised:boolean){
+  const arm=f.parts[hand],palm=arm.children[1],reach=gripPoint.clone().applyQuaternion(palm.quaternion).add(palm.position);
+  const spacing=Math.hypot(this.actors[0].x-this.actors[1].x,this.actors[0].z-this.actors[1].z);
+  // Solve the small inward shoulder adjustment from the real hand anchor.
+  // Raise forward for the high five; never sweep arms through each other.
+  const side=Math.sign(arm.position.x),radius=Math.hypot(reach.x,reach.y);
+  const reachX=(spacing-.22)/2-Math.abs(arm.position.x);
+  const angle=Math.asin(T.MathUtils.clamp(reachX/radius,-.95,.95))-Math.atan2(Math.abs(reach.x),-reach.y);
+  arm.rotation.z=T.MathUtils.lerp(side*T.MathUtils.degToRad(9.782),side*angle,k);
+  arm.rotation.x=(raised?-2.3:-.15)*k;
+ }
  private points(spacing:number){return[-1,1].map(sign=>this.center.clone().addScaledVector(this.axis,sign*spacing/2));}
  cancel(){
   if(this.done||this.cancelled)return;
@@ -58,7 +75,7 @@ export class ActionScene{
    if(stage.facing)this.face(stage.facing,dt);
    if(stage.name==='gesture'){
     if(stage.motion==='stroll')this.stroll(dt,duration);else this.gesture(this.time,envelope,dt);
-    if(!this.cuePlayed&&this.time>.68&&ACTIONS[this.kind].cue){this.cuePlayed=true;this.sound(ACTIONS[this.kind].cue!);}
+    if(!this.cuePlayed&&this.time>.68&&ACTIONS[this.kind].cue&&(!['holdHands','highFive'].includes(this.kind)||this.contactDistance()<.28)){this.cuePlayed=true;this.sound(ACTIONS[this.kind].cue!);}
    }
    if(this.time>=duration)this.advance();
   }
@@ -66,7 +83,7 @@ export class ActionScene{
  }
  private advance(){this.time=0;this.index++;if(this.index>=this.stages.length)this.dispose();}
  private face(facing:NonNullable<Phase['facing']>,dt:number){
-  this.actors.forEach((f,i)=>{turn(f,facing==='viewer'?this.viewerAngle:facing==='together'?this.togetherAngle:this.angle+(i===0?0:Math.PI)+(this.kind==='kiss'&&i===1?.3:0),dt);headPose(f);});
+  this.actors.forEach((f,i)=>{turn(f,facing==='viewer'?this.viewerAngle:facing==='together'?this.togetherAngle:this.angle+(i===0?0:Math.PI)+(this.kind==='kiss'&&i===1?.75:0),dt);headPose(f);});
  }
  private stroll(dt:number,duration:number){
   const k=this.time/duration,normal=new T.Vector2(-this.axis.y,this.axis.x);
@@ -82,19 +99,17 @@ export class ActionScene{
   switch(this.kind){
    case'wave':for(const f of participants)f.parts.rightArm.rotation.x=(-2.4+Math.sin(t*10)*.25)*k;break;
    case'dance':participants.forEach((f,i)=>{f.heading+=dt*1.2;this.walk(f,.35*k);f.parts.rightArm.rotation.x=(-1.3+Math.sin(t*5+i)*.6)*k;f.parts.leftArm.rotation.x=(-1.3-Math.sin(t*5+i)*.6)*k;f.waist.rotation.z=Math.sin(t*5)*.06*k;f.heightOffset=Math.abs(Math.sin(t*5))*.1*k;});break;
-   case'hug':for(const f of participants){f.parts.rightArm.rotation.x=-1.5*k;f.parts.leftArm.rotation.x=-1.5*k;}break;
+   case'hug':participants.forEach((f,i)=>{const reach=i===0?-1.35:-1.57;f.parts.rightArm.rotation.x=reach*k;f.parts.leftArm.rotation.x=reach*k;f.waist.rotation.x=.025*k;});break;
    case'kiss':
     headPose(a,.12*k,0,-.04*k);headPose(b,.08*k,Math.PI/4*k,.04*k);
     for(const f of this.actors){f.parts.rightArm.rotation.x=.22*k;f.parts.leftArm.rotation.x=.18*k;}
     this.heart.material.opacity=t>.68?Math.sin(Math.min(1,(t-.68)/1.7)*Math.PI)*.8:0;this.heart.position.set(this.center.x,3.65+Math.min(t,2)*.15,this.center.y);break;
    case'shy':this.actors.forEach((f,i)=>{const amount=k*(i===0?.72:1);headPose(f,.18*k,((i===0?-.35:.4)+Math.sin(t*1.8)*.1)*k,(i===0?-.08:.08)*k);f.parts.rightArm.rotation.x=-2.05*amount;f.parts.leftArm.rotation.x=-1.9*amount;f.parts.rightArm.rotation.z+=.28*k;f.parts.leftArm.rotation.z-=.28*k;});break;
    case'holdHands':
-    a.parts[handA].rotation.z+=side*.06*k;b.parts[handB].rotation.z-=side*.06*k;
-    a.parts[handA].rotation.x=-.15*k;b.parts[handB].rotation.x=-.15*k;
+    this.meetHands(a,handA,k,false);this.meetHands(b,handB,k,false);
     headPose(a,.02*k,.2*side*k);headPose(b,.02*k,-.2*side*k);break;
    case'highFive':
-    a.parts[handA].rotation.z=side*T.MathUtils.lerp(.17,1.95,k);b.parts[handB].rotation.z=-side*T.MathUtils.lerp(.17,1.95,k);
-    a.parts[handA].rotation.x=-.15*k;b.parts[handB].rotation.x=-.15*k;
+    this.meetHands(a,handA,k,true);this.meetHands(b,handB,k,true);
     headPose(a,-.07*k,.22*side*k);headPose(b,-.07*k,-.22*side*k);break;
    case'beckon':lead.parts.rightArm.rotation.x=(-1.65+Math.sin(t*8)*.25)*k;headPose(lead,0,.1*k);headPose(other,.05*k,-.12*k);break;
    case'look':for(const f of this.actors)headPose(f,-.07*k,Math.sin(t*.8)*.14*k);break;

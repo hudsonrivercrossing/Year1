@@ -78,7 +78,7 @@ for i,d in enumerate(json.loads((root/'src/character-definitions.json').read_tex
  head=empty('head',upper,position((0,-24,0)));part(d['headPart'],d['skin'],head)
  hair=empty('hair',upper,position((0,-24,0)));part(d['hairPart'],d['hair'],hair)
  for hand_name,kind in [('rightArm','pole'),('leftArm','mug' if i==0 else 'iceCream')]:
-  socket=empty('photo_grip_'+hand_name,hands[hand_name],position((0,-.8229,-9.8948)))
+  socket=empty('photo_grip_'+hand_name,hands[hand_name],position(prop_appearances['handGrip']))
   socket['source']='LDraw 3820 !HELP grip centre';socket['lifecycle']='Web: drop once per complete activity, return and pick up after finish/cancel'
   appearance=prop_appearances[kind]
   if kind=='pole':socket.rotation_euler.x=math.radians(appearance['gripTiltDegrees'])

@@ -1,4 +1,5 @@
 {
+  "handGrip": [0, -0.8229, -9.8948],
   "pole": {
     "parts": [{"id": "90540", "color": "#758b7d", "offset": [0, -8, 0]}],
     "gripTiltDegrees": 19.5,

@@ -4,7 +4,7 @@ async page=>{
  await page.waitForFunction(()=>window.__brickWorld.activity==='wander',{timeout:45000});
  if((await read()).autoInteractions){await page.locator('#moments summary').click();await page.locator('#surprises').click();await page.keyboard.press('Escape');}
  for(const id of ['highFive','sit','beckon','holdHands','look','wait']){
-  await page.locator('#moments summary').click();await page.locator('#'+id).click();let state=await read();assert(state.props.held===0&&state.props.dropped===4,'Props must be dropped before '+id);
+  await page.locator('#moments summary').click();await page.locator('#library-tab-'+(['highFive','holdHands'].includes(id)?'affection':'together')).click();await page.locator('#'+id).click();let state=await read();assert(state.props.held===0&&state.props.dropped===4,'Props must be dropped before '+id);
   await page.waitForFunction(id=>window.__brickWorld.activity===id&&window.__brickWorld.action?.phase==='gesture'&&window.__brickWorld.action.time>.95,id,{timeout:35000});
   state=await read();assert(state.props.held===0,'Props re-equipped in gesture '+id);if(id==='sit')for(const f of state.figures){assert(f.heightOffset<-.4,'Sit must lower pelvis');assert(f.feetY>=-.002&&f.feetY<.075,'Seated feet must rest on board '+f.feetY);}
   await page.screenshot({path:`output/playwright/mobile-v2-${id}.png`});
