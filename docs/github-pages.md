@@ -56,3 +56,7 @@ git -C /absolute/path/to/year1-public push origin main refs/tags/v1.0.0
 ## 手机取景与拼装工具更新
 
 拼装约 46°、漫步约 29°并拉远；找一块／帮放好、再散开、取景三个并列小工具替代展开菜单。本轮具体变更与验证见 [手机取景 v5](mobile-view-v5.md)。
+
+## 对外 README 素材
+
+按用户明确要求，README 展示实物纪念相框照片，完整副本位于 `readme-assets/anniversary-frame.png`。该文件与最初上传的 726×866 PNG 逐字节一致，没有裁切或补画。此授权仅针对这张展示用照片；`assets/` 原始目录、Blender 和其他私有素材仍不进入公开历史。跳舞 GIF 录自现有网页动作，零件图鉴渲染自当前 GLB 模型，保留 LDraw 署名和原创近似说明。
