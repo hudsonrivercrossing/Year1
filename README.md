@@ -2,11 +2,11 @@
 
 **DJ & YW · 1st Anniversary**
 
-> Experience the world together.
+Experience the world together.
 
 一块一块，拼出我们。然后一起散步、跳舞、抱抱，把平常的一天过成小小的纪念。
 
-*A little world for our first year together. Build us, bring us to life, and stay for a little dance.*
+A little world for our first year together. Build us, bring us to life, and stay for a little dance.
 
 **[走进我们的小世界 · Enter our little world ↗](https://hudsonrivercrossing.github.io/Year1/)**
 
@@ -30,7 +30,7 @@
 
 把散落的零件拼成 DJ 和 YW，或点「我太懒了」帮忙拼好。唤醒之后，陪他们漫步、牵手、亲脸颊，或跳一支舞。
 
-手机和电脑都可以玩，支持中英文。想更有气氛，就打开右上角的音乐。
+想更有气氛，就打开右上角的音乐。
 
 ## 两个人，十二块积木
 
@@ -106,7 +106,3 @@ YW 加一会儿班，DJ 在桌边小跑陪伴；一起种下五朵花，种满�
     <td align="center" colspan="2"><img src="readme-assets/part-3023.png" alt="包体基础 3023" width="150"><br>包体基础<br><code>3023</code><br><sub>1 × 2 板</sub></td>
   </tr>
 </table>
-
-电脑屏幕与键盘、包身外壳、双提手、皮带、扣件、缝线、礼盒与爱心为原创装饰，无标准零件编号。包参考暖棕色 Birkin 家族的造型语言，不含品牌标志，不宣称官方 LEGO 联名或已确认的真实礼物款式。
-
-标准几何保留 LDraw 来源与许可，发型近似和上衣重绘也分别标注。详见 [道具来源](public/models/little-life-assets.md)、[零件复核](docs/photo-parts-followup.md) 与 [剩余事项](TODO.md)。图鉴可用 `scripts/props-catalog.html` 与 `scripts/capture-props-catalog.js` 从当前模型重新生成。
