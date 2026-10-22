@@ -96,3 +96,5 @@
 - [x] [Year1](https://hudsonrivercrossing.github.io/Year1/)：GitHub Pages /Year1/ 子路径、自动发布、双语与手机浏览器验收完成；146 个线上资源 SHA256 与本地一致。保留 v1.0.0，从全部公开历史排除原始照片、Blender 与凭据；[部署记录](docs/github-pages.md)。
 
 - [x] 手机取景与三个拼装工具 v5 发布到原私有 ChatGPT Site 和 Year1 Pages；验证见 [记录](docs/mobile-view-v5.md)。
+
+- [x] 手机“小小心动”约 213px 毛玻璃卡片、人物避让取景；背景音乐改为 Piece by Piece，保留轻音量与独立音效。见 [验证记录](docs/glass-menu-music.md)。

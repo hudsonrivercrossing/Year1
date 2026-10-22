@@ -34,7 +34,7 @@ The earlier Our Little World file is preserved as an alternate, not loaded by th
 - File signal: mean −17.5 dBFS, peak −0.6 dBFS (ffmpeg volumedetect). Page uses 0.20 volume with the existing 1.1-second fades, loop enabled and music off until clicked. Effect volume is independent.
 - Earlier versions are preserved as alternates.
 
-## Current default: Little Days
+## Previous default: Little Days
 
 - File: `little-days.mp3`
 - Generation task: `79fc36a5-619d-4fd6-af6d-3c998a8f92cd`
@@ -45,3 +45,15 @@ The earlier Our Little World file is preserved as an alternate, not loaded by th
 - Raw generated audio is retained locally as `assets/audio/little-days-original.mp3`; only the quieter playback edition is included in the hosted app. Earlier tracks remain available as alternates.
 - Duration: 60.186122 seconds; playback file 1,204,927 bytes. Original integrated loudness -14.42 LUFS; applied fixed gain -5.580 dB, 0.25-second intro and 0.7-second outro fades. Playback edition: -20.44 LUFS, true peak -6.40 dBTP. No normalization boost or dynamic compression.
 - Page volume: 0.14 (previously 0.20), 1.1-second toggle fades, loop enabled, off until a click. Existing independent effects are unchanged. Loop playback is enabled; beat-perfect seamless looping is not claimed.
+
+## Current default: Piece by Piece
+
+- File: `piece-by-piece.mp3`; original instrumental generated with Treblo v3-preview.
+- Task: `10fa11dd-f029-4fcf-a720-2d818652a36b`.
+- Source: https://cdn.treblo.com/pubapi/generations3/audio_10fa11dd-f029-4fcf-a720-2d818652a36b_0.wav
+- Brief: a playful toy-brick game and first-anniversary gift, a tiny four-note plucked wooden motif, short pizzicato bass and a restrained steady beat; clean, sparse, bouncy, not a sentimental ballad. Requested around 112 BPM with room between phrases. These are the composition brief, not an independently verified instrument, note-count or tempo transcription.
+- Only this generic musical brief was submitted: no photograph, names or reference soundtrack.
+- Duration: 50.201542 seconds before MP3 encoder padding; playback file 1,005,261 bytes. The generation requested a short motif but returned a 50-second arrangement; it is not represented as an exact 34-second or beat-perfect seamless loop.
+- Fixed gain -5.57 dB, 20 ms intro and 60 ms outro fades; no compressor or normalization boost. Playback integrated loudness -21.44 LUFS, true peak -5.02 dBTP. `loudnorm` was used only for measurement; its suggested dynamic processing was not applied.
+- Page volume remains 0.14, with 1.1-second on/off fades, off until tapped, loop enabled, and independent interaction cues.
+- Raw WAV retained only locally at `assets/audio/piece-by-piece-original.wav`; previous playback tracks remain available.

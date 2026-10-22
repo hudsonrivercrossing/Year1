@@ -45,7 +45,7 @@ def export(destination):
             git(source, 'fast-export', '--signed-tags=strip', '--tag-of-filtered-object=rewrite',
                 '--full-tree', '--export-marks=' + str(before),
                 '--refspec=' + branch + ':refs/heads/main', branch, 'refs/tags/v1.0.0', '--', '.',
-                ':(exclude)assets', ':(exclude)output', ':(exclude).openai', stdout=handle)
+                ':(exclude)assets', ':(exclude)output', ':(exclude).openai', ':(exclude)docs/media', stdout=handle)
         with stream.open('rb') as handle:
             git(destination, 'fast-import', '--quiet', '--export-marks=' + str(after), stdin=handle)
         def marks(path):
@@ -66,7 +66,7 @@ def export(destination):
 
 def audit(destination):
     objects = output(destination, 'rev-list', '--objects', '--all').splitlines()
-    forbidden = re.compile(r'^(assets|output|\.openai|node_modules|dist|dist-pages)(/|$)|(^|/)(\.env($|\.)|[^/]*\.blend\d*$|[^/]*\.(pem|key)$)', re.I)
+    forbidden = re.compile(r'^(docs/media|assets|output|\.openai|node_modules|dist|dist-pages)(/|$)|(^|/)(\.env($|\.)|[^/]*\.blend\d*$|[^/]*\.(pem|key)$)', re.I)
     for line in objects:
         sha, _, path = line.partition(' ')
         if forbidden.search(path):

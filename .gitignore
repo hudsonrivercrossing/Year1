@@ -19,3 +19,5 @@ dist-pages/
 !.env.example
 *.pem
 *.key
+# Original reference images added locally during design work.
+docs/media/

@@ -12,7 +12,7 @@ async page=>{
  await page.locator('#mode-guided').waitFor();await page.waitForFunction(()=>document.querySelector('#loading').hidden);
  assert(!await page.evaluate(()=>'__brickWorld'in window),'Development snapshot exposed');
  const audio=await page.evaluate(()=>{const a=window.__year1TestAudio;return{src:a.src,paused:a.paused,loop:a.loop};});
- assert(new URL(audio.src).pathname==='/Year1/audio/little-days.mp3'&&audio.paused&&audio.loop,'Audio path, loop or no-autoplay failed');
+ assert(new URL(audio.src).pathname==='/Year1/audio/piece-by-piece.mp3'&&audio.paused&&audio.loop,'Audio path, loop or no-autoplay failed');
  for(const family of ['Anniversary WenKai','Anniversary Latin','Keepsake Script'])assert(await page.evaluate(async family=>(await document.fonts.load(`16px "${family}"`)).length>0,family),'Font failed '+family);
  await page.locator('.credits summary').click();
  for(const path of ['ldraw-source/CAreadme.txt','textures/README.md']){

@@ -182,3 +182,27 @@ body[data-mode=play] .tools .library-footer .surprises-toggle{justify-content:sp
  body[data-mode=build] #scene{bottom:64px}
 }
 @media(prefers-reduced-motion:reduce){.tool-disc{transition:none}}
+
+/* A small frosted action card leaves the toy world in view. */
+@media(max-width:700px), (max-width:1000px) and (max-height:500px){
+ .moments-list{padding:8px;gap:4px;border-radius:18px;max-height:min(44dvh,240px);background:rgb(247 242 233 / .76);border-color:rgb(202 185 159 / .65);box-shadow:0 5px 20px #6a503314;-webkit-backdrop-filter:blur(5px) saturate(1.05);backdrop-filter:blur(5px) saturate(1.05)}
+ .library-heading{position:absolute;top:8px;right:8px;padding:0;width:44px}
+ .library-heading h2{display:none}
+ .library-tabs{margin:0 48px 0 0;padding:2px;background:rgb(234 225 212 / .45)}
+ body[data-mode=play] .tools .library-tabs button{min-height:44px;padding:6px 3px;font-size:var(--text-caption)}
+ body[data-mode=play] .tools .library-close{height:44px;min-height:44px}
+ .library-group>div,.library-group.recipes>div{grid-template-columns:repeat(2,minmax(0,1fr));gap:2px}
+ #library-panel-together>div{grid-template-columns:repeat(3,minmax(0,1fr))}
+ body[data-mode=play] .tools .library-group button{min-height:44px;padding:5px 8px;font-size:var(--text-caption);line-height:1.35}
+ .library-footer{display:flex;align-items:center;gap:4px;padding-top:4px;margin:0;border-color:rgb(202 185 159 / .45)}
+ body[data-mode=play] .tools .library-footer .surprises-toggle{flex:1;width:auto;min-width:0;min-height:44px;padding:5px 8px;gap:8px}
+ .surprises-toggle>span:first-child{font-size:var(--text-caption)!important}
+ body[data-mode=play] .tools #rebuild-menu{width:44px;min-width:44px;min-height:44px;padding:10px;justify-content:center}
+ #rebuild-menu span{display:none}
+}
+@media(max-height:500px) and (min-width:701px) and (max-width:1000px){
+ .moments-list{left:auto;right:0;width:320px;max-height:calc(100dvh - 116px)}
+}
+@supports not ((backdrop-filter:blur(5px)) or (-webkit-backdrop-filter:blur(5px))){
+ @media(max-width:700px), (max-width:1000px) and (max-height:500px){.moments-list{background:rgb(247 242 233 / .94)}}
+}
