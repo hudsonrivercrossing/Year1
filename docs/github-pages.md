@@ -5,7 +5,7 @@
 - 发布源：main 的 GitHub Actions；仅上传 dist-pages 生产资源。
 - 构建：Node.js 22、npm ci、npm run build:pages。
 - Vite pages 模式：base=/Year1/、outDir=dist-pages。默认模式保留根路径构建，现有 ChatGPT Site 保留。
-- 三个高级动作已实现，入口“小小心动 → 生活”；种花最多保留一朵，重拼清除；完整流程见 advanced-scenes-plan.md。
+- 三个高级动作已实现，入口“小小心动 → 生活”；花园最多五朵，满额后陪花跳舞，重拼清除；当前升级见 advanced-scenes-plan.md 与 life-scenes-v2-release.md。
 
 ## 发布历史与本地原件
 
