@@ -36,25 +36,19 @@ export function scheduleCue(ctx:BaseAudioContext,output:AudioNode,cue:SoundCue,a
 
 /** Music and sound effects are independent. Audio unlocks only in a user gesture. */
 export class SoundEffects{
- enabled=localStorage.getItem('little-world-sfx')!=='off';
+ readonly enabled=true;
  private context?:AudioContext;
  private master?:GainNode;
  private nextImpact=0;
  private counts:Record<SoundCue,number>={snap:0,drop:0,complete:0,awaken:0,wave:0,hug:0,dance:0,kiss:0,shy:0,holdHands:0,highFive:0,look:0};
  unlock(){
-  if(!this.enabled)return;
   try{
    if(!this.context){this.context=new AudioContext();this.master=this.context.createGain();this.master.gain.value=.28;this.master.connect(this.context.destination);}
    if(this.context.state==='suspended')void this.context.resume().catch(()=>{});
   }catch{/* A silent fallback keeps the gift usable when audio is unavailable. */}
  }
- toggle(){
-  this.enabled=!this.enabled;localStorage.setItem('little-world-sfx',this.enabled?'on':'off');
-  if(this.enabled)this.unlock();
-  if(this.master&&this.context){this.master.gain.cancelScheduledValues(this.context.currentTime);this.master.gain.setTargetAtTime(this.enabled?.28:0,this.context.currentTime,.012);}
- }
  play(cue:SoundCue,strength=1){
-  const ctx=this.context;if(!this.enabled||!ctx||ctx.state!=='running'||!this.master)return;
+  const ctx=this.context;if(!ctx||ctx.state!=='running'||!this.master)return;
   // Impacts at rest stay silent; limit simultaneous clatter from an initial scatter.
   if(cue==='drop'){if(strength<.045||ctx.currentTime<this.nextImpact)return;this.nextImpact=ctx.currentTime+.035;}
   this.counts[cue]++;scheduleCue(ctx,this.master,cue,ctx.currentTime+.004,strength);

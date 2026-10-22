@@ -22,7 +22,7 @@ async page=>{
  await page.locator('#music').click();await page.waitForTimeout(1500);
  const playing=await page.evaluate(()=>{const a=window.__year1TestAudio;return{paused:a.paused,time:a.currentTime,volume:a.volume};});assert(!playing.paused&&playing.time>0&&Math.abs(playing.volume-.14)<.001,'Music did not play quietly');
  await page.locator('#language').click();assert(!await page.evaluate(()=>window.__year1TestAudio.paused),'Language interrupted audio');
- const sound=await page.locator('#sound').getAttribute('aria-pressed');await page.locator('#sound').click();assert(await page.locator('#sound').getAttribute('aria-pressed')!==sound&&!await page.evaluate(()=>window.__year1TestAudio.paused),'Sound effects not independent');await page.locator('#sound').click();
+ assert(await page.locator('#sound').count()===0,'Sound toggle remains');
  await page.locator('#music').click();await page.waitForTimeout(1300);assert(await page.evaluate(()=>window.__year1TestAudio.paused),'Music did not pause');
  await page.locator('#mode-guided').click();await page.locator('#auto').click();await page.locator('#life').waitFor({timeout:12000});await page.locator('#life').click();await page.locator('#moments').waitFor({timeout:8000});
  await page.locator('#moments summary').click();if(await page.locator('#surprises').getAttribute('aria-checked')==='true')await page.locator('#surprises').click();await page.keyboard.press('Escape');
