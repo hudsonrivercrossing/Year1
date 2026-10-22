@@ -47,7 +47,7 @@ git -C /absolute/path/to/year1-public push origin main refs/tags/v1.0.0
 - GitHub 仓库 public、默认分支 main；Pages build_type=workflow，HTTPS 已启用。
 - 对公开网址运行 check-pages.js：四个手机竖屏、一个横屏与一个桌面 × 中英文，12 种布局通过；模型、贴图、字体和音乐加载正常，无页面异常或 HTTP 资源错误；取消/恢复/重拼通过。
 - 146 个线上文件逐一 SHA256 与已验收 dist-pages 相同。
-- 当前版本与 v1.0.0 文件树在排除私有目录后逐项一致；全部 19 个历史提交均完成同样核对。9 个私有原件的 blob ID 均不存在于公开可达对象中；禁止路径和常见凭据特征扫描通过。
+- 分别核对当前版本和 v1.0.0：排除私有目录后，公开文件树与各自的本地版本逐项一致；本次发布前的 19 个历史提交均完成同样核对。9 个私有原件的 blob ID 均不存在于公开可达对象中；禁止路径和常见凭据特征扫描通过。
 - 本机 v1.0.0 保持原 SHA；GitHub v1.0.0 指向清理后的 2cc79b67cb1b3654df7fe598613f5d66c702a5cd。
 - 现有 ChatGPT Site 保留；本轮未修改其部署或访问范围。
 
