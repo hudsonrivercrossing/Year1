@@ -11,6 +11,9 @@ assert(bounds.max.y+.28<1.96,'Bag hits closed lid');
 assert.equal(BAG_GRIP.y,BAG_SUPPORT.y);assert.equal(BAG_GRIP.y,.9975);
 assert(Math.abs(BAG_IN_BOX.y-GIFT_BOX_POSITION.y-.28)<1e-8);
 assert.equal(bag.userData.standardParts[0],'93091');
+assert(Math.hypot(GIFT_BOX_POSITION.x,GIFT_BOX_POSITION.z)+GIFT_BOX_RADIUS<3.4,'Box exceeds existing interaction clearing');
+assert(Math.hypot(-2.3-GIFT_BOX_POSITION.x,-GIFT_BOX_POSITION.z)>.72+GIFT_BOX_RADIUS,'Unwrap stance overlaps box');
+assert(Math.hypot(-2.3,0)+.72<3.4,'Unwrap stance exceeds clearing');
 const {root,lid}=makeGiftBox(make),boxBounds=new T.Box3().setFromObject(root),center=GIFT_BOX_POSITION;
 for(const x of [boxBounds.min.x,boxBounds.max.x])for(const z of [boxBounds.min.z,boxBounds.max.z])assert(Math.hypot(x-center.x,z-center.z)<=GIFT_BOX_RADIUS,'Mesh extends outside navigation footprint');
 // There must be no body mesh crossing the cavity centre above the floor.

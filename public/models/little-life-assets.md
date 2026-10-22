@@ -38,8 +38,7 @@ renderings of the current assembled props and selected standard base parts.
 The bag and box thumbnails render the actual game geometry. The box has a real
 hollow cavity with 1.4 × 1.68 × .7 scene-unit clearance; the full-scale bag is
 1.333 × 1.138 × .681. It rises vertically through the open lid before turning
-into the hand and the box is removed before presentation. The renderer and
-navigation planner share the full box footprint from `src/gift-layout.ts`.
-The planner chooses a clear front/back placement and validates the matching
-unwrapping stance; people keep their original walking limits while the box
-may use the wider physical tabletop.
+into the hand and the box is removed before presentation. The complete box footprint and the unwrapping stance fit
+inside the existing
+3.4-unit interaction clearing, so navigation and clearing algorithms stay intact.
+The full box is still registered as a conservative circular obstacle while visible.

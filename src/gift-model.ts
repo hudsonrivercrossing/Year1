@@ -19,8 +19,8 @@ export function makeGiftBag(make:PartFactory){
 /** Hollow 4 x 3 stud gift box, assembled only from standard part geometry.
  * Internal clearance: 1.4 x 1.68 x .7; bag: 1.333 x 1.138 x .681.
  * The lid lifts on a virtual animation pivot, not a claimed LEGO hinge. */
-export function makeGiftBox(make:PartFactory,boxZ:number=GIFT_BOX_LAYOUT.z){
- const root=new T.Group(),lid=new T.Group();root.name='surprise-gift-box';root.position.copy(GIFT_BOX_POSITION);root.position.z=boxZ;
+export function makeGiftBox(make:PartFactory){
+ const root=new T.Group(),lid=new T.Group();root.name='surprise-gift-box';root.position.copy(GIFT_BOX_POSITION);
  const add=(parent:T.Group,id:string,color:string,x:number,y:number,z:number,turn=0)=>{const part=make(id,color);part.position.set(x,y,z);part.rotation.y=turn;parent.add(part);};
  const orange='#d58b45',ribbon='#664333';
  for(const x of [-.7,.7])add(root,'3021',orange,x,.28,0,Math.PI/2);

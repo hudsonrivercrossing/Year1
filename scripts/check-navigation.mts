@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict';
-import {GIFT_BOX_LAYOUT as giftBox} from '../src/gift-layout';
 import {planPath,segmentClear,clearance,findClearing,Navigator,distance,type Obstacle} from '../src/navigation.ts';
 const bounds={wanderX:11.5,wanderZ:8};
 const flower:Obstacle={a:{x:0,z:0},b:{x:0,z:0},radius:1,kind:'flower'};
@@ -19,23 +18,6 @@ let checked=0;for(let n=0;n<100;n++){
 }
 const drops:Obstacle[]=[{a:{x:-.6,z:-.4},b:{x:-.6,z:2},radius:.15,owner:0},{a:{x:.7,z:-1.8},b:{x:.7,z:.8},radius:.15,owner:1},{a:{x:-1,z:0},b:{x:-1,z:0},radius:.5,owner:0},{a:{x:1,z:0},b:{x:1,z:0},radius:.5,owner:1}, {a:{x:-5,z:-3},b:{x:-5,z:-3},radius:1,kind:'flower'}];
 for(const kind of ['basic','gift','flower','overtime'] as const){const plan=findClearing([{x:0,z:0},{x:.1,z:.1}],drops,bounds,kind);assert(plan,kind+' no clearing');assert(distance(plan.center,{x:0,z:0})<8,'Too far');for(const p of plan.points)assert(drops.every(o=>clearance(p,o)>.8));if(kind!=='overtime')assert(drops.every(o=>clearance(plan.center,o)>=(kind==='gift'?2.7:3.4)+.19));}
-
-// A clear couple centre is insufficient if the larger box clips props behind it.
-for(const z of [-5,0,5]){
- const props:Obstacle[]=[{a:{x:0,z:z-3},b:{x:0,z:z-3},radius:.5}];
- const plan=findClearing([{x:-2,z},{x:2,z}],props,bounds,'gift');assert(plan);
- const box={x:plan.center.x+giftBox.x,z:plan.center.z+plan.giftBoxZ!};
- assert(Math.abs(box.x)+giftBox.radius<=bounds.wanderX&&Math.abs(box.z)+giftBox.radius<=bounds.wanderZ);
- assert(props.every(o=>clearance(box,o)>=giftBox.radius+.2));
-}
-// Props dropped forward and a full garden must still leave a gift stage behind.
-{const objects:Obstacle[]=[...[-9,9].flatMap(x=>[-5,0,5].map(z=>({a:{x,z},b:{x,z},radius:1.05}))),...[-3,1].map(x=>({a:{x,z:-.57},b:{x,z:1.51},radius:.33})),{a:{x:-1.08,z:.49},b:{x:-1.05,z:1.68},radius:.47},{a:{x:2.97,z:.06},b:{x:3.04,z:.85},radius:.55}];
- const physicalBounds={...bounds,width:28,depth:20},plan=findClearing([{x:-2,z:0},{x:2,z:0}],objects,physicalBounds,'gift');assert(plan,'Full garden gift has no clearing');
- const box={x:plan.center.x+giftBox.x,z:plan.center.z+plan.giftBoxZ!};
- assert(Math.abs(box.x)+giftBox.radius<=14&&Math.abs(box.z)+giftBox.radius<=10,'Gift box leaves physical table');
- assert(plan.points.every(p=>Math.abs(p.x)<=bounds.wanderX&&Math.abs(p.z)<=bounds.wanderZ),'People leave walking region');
- assert(objects.every(o=>clearance(box,o)>=giftBox.radius+.2),'Gift box intersects dropped props');
-}
 // Two moving people exchange sides without sharing the same point.
 {const actors=[{x:-2,z:0},{x:2,z:0}],goals=[{x:2,z:0},{x:-2,z:0}],nav=new Navigator();for(let frame=0;frame<2000;frame++){for(let i=0;i<2;i++){const other=actors[1-i],o={a:{...other},b:{...other},radius:1.72-.72};Object.assign(actors[i],nav.step(actors[i],goals[i],1/60,2,[o],bounds));}assert(distance(actors[0],actors[1])>=1.719);if(actors.every((a,i)=>distance(a,goals[i])<.05))break;}assert(actors.every((a,i)=>distance(a,goals[i])<.05),'People deadlocked');}
 console.log(JSON.stringify({passed:true,checked,checks:['straight-line regression','flower and horizontal pole detours','swept collision at every frame','no teleport','nearby clear stages including office ingress','people exchanging sides']}));

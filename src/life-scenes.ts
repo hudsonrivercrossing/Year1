@@ -1,7 +1,6 @@
 import * as T from 'three';
 import {headPose,type Actor} from './affection';
 import type {Point} from './navigation';
-import {giftUnwrapPoint} from './gift-layout';
 import {officeObstacles,OFFICE_ROUTE} from './office-layout';
 import {makeGiftBag,makeGiftBox,makeSmallHeart,BAG_GRIP,BAG_SUPPORT,BAG_IN_BOX,GIFT_BOX_POSITION,GIFT_BOX_RADIUS} from './gift-model';
 import type {SoundCue} from './sound-effects';
@@ -69,7 +68,7 @@ export class LifeScene{
  private index=0;private time=0;private total=0;private done=false;private cancelled=false;private release=0;private committed=false;private owner:'DJ'|'YW'='DJ';private tick=0;
  private anchor:T.Vector2;private entryZ:number;private cancelGiftPosition=new T.Vector3();private clearViaSeat=false;private exitFrom=-13;private saved?:{height:number;legs:number[];arms:number[];waist:number}[];
  private routeIndex=0;private routePause=0;private stages:Stage[];private seatBlend=0;private bagVisible=false;private transferGap:number|undefined;
- constructor(readonly kind:LifeId,private actors:Actor[],private scene:T.Scene,private world:LittleLifeWorld,private move:Move,private walk:(f:Actor,k:number)=>void,private sound:(cue:SoundCue)=>void,anchor?:T.Vector2,entryZ=-13,flowerStands?:Point[],private officeCompact=false,private giftBoxZ:number=GIFT_BOX_POSITION.z){
+ constructor(readonly kind:LifeId,private actors:Actor[],private scene:T.Scene,private world:LittleLifeWorld,private move:Move,private walk:(f:Actor,k:number)=>void,private sound:(cue:SoundCue)=>void,anchor?:T.Vector2,entryZ=-13,flowerStands?:Point[],private officeCompact=false){
   this.anchor=anchor??(kind==='flower'?world.flowerPoint.clone():new T.Vector2());this.entryZ=entryZ;this.root.position.set(this.anchor.x,0,this.anchor.y);
   this.root.name='little-life-scene';scene.add(this.root);
   if(kind==='overtime'){
@@ -78,7 +77,7 @@ export class LifeScene{
    this.seed.add(world.make('24866',FLOWER_STYLES[world.selectedId].color));this.root.add(this.seed);this.seed.visible=!world.planted;
    this.stages=[{name:'approach',points:flowerStands?flowerStands.map(p=>[p.x-this.anchor.x,p.z-this.anchor.y]):[[-1.1,1.6],[1.1,1.6]]},{name:'reveal',duration:1.2},{name:world.planted?'flower-dance':'plant',duration:world.planted?5.5:2.4},{name:'admire',duration:3},{name:'release',duration:.8}];
   }else{
-   this.buildGift();this.stages=[{name:'unwrap-approach',points:[[giftUnwrapPoint(this.giftBoxZ).x,giftUnwrapPoint(this.giftBoxZ).z],[1.4,1]]},{name:'unwrap',duration:2.2},{name:'tuck-away',duration:.7},{name:'approach',points:[[-1.3,1],[1.3,1]]},{name:'curious',duration:1.1},{name:'hide-turn',duration:1.1},{name:'reveal',duration:1.4},{name:'offer',duration:1.2},{name:'receive',duration:1.2},{name:'show',duration:3.2},{name:'stow',duration:1},{name:'kiss-approach',points:[[-.54,1],[.54,1]]},{name:'kiss',duration:2.2},{name:'shy-space',points:[[-1.2,1],[1.2,1]]},{name:'shy',duration:2.3},{name:'separate',points:[[-1.4,1],[1.4,1]]},{name:'release',duration:.65}];
+   this.buildGift();this.stages=[{name:'unwrap-approach',points:[[-2.3,0],[1.4,1]]},{name:'unwrap',duration:2.2},{name:'tuck-away',duration:.7},{name:'approach',points:[[-1.3,1],[1.3,1]]},{name:'curious',duration:1.1},{name:'hide-turn',duration:1.1},{name:'reveal',duration:1.4},{name:'offer',duration:1.2},{name:'receive',duration:1.2},{name:'show',duration:3.2},{name:'stow',duration:1},{name:'kiss-approach',points:[[-.54,1],[.54,1]]},{name:'kiss',duration:2.2},{name:'shy-space',points:[[-1.2,1],[1.2,1]]},{name:'shy',duration:2.3},{name:'separate',points:[[-1.4,1],[1.4,1]]},{name:'release',duration:.65}];
   }
  }
  private buildOffice(){
@@ -98,7 +97,7 @@ export class LifeScene{
  }
  private buildGift(){
   this.gift=makeGiftBag(this.world.make);this.gift.visible=false;this.root.add(this.gift);
-  const box=makeGiftBox(this.world.make,this.giftBoxZ);this.giftBox=box.root;this.boxLid=box.lid;this.root.add(this.giftBox);
+  const box=makeGiftBox(this.world.make);this.giftBox=box.root;this.boxLid=box.lid;this.root.add(this.giftBox);
   this.heart=makeSmallHeart();this.heart.visible=false;this.root.add(this.heart);
  }
  private event(id:string,cue:SoundCue){if(this.events.has(id))return;this.events.add(id);this.sound(cue);}
@@ -118,7 +117,7 @@ export class LifeScene{
    a.parts.leftArm.rotation.x=-1; a.waist.rotation.x=Math.sin(p*Math.PI)*.12;this.updateRoots();
    this.boxLid.rotation.x=-1.6*ease(Math.min(1,p/.4));if(p>.12)this.event('box','boxOpen');
    this.bagVisible=true;this.gift.visible=true;
-   const from=BAG_IN_BOX.clone().setZ(this.giftBoxZ),raised=from.clone().setY(2.4),travel=ease(T.MathUtils.clamp((p-.7)/.3,0,1));
+   const from=BAG_IN_BOX.clone(),raised=from.clone().setY(2.4),travel=ease(T.MathUtils.clamp((p-.7)/.3,0,1));
    // Lift upright through the open cavity before turning toward the hand.
    this.gift.rotation.y=Math.PI/2*travel;
    const to=palm(a,'leftArm').sub(this.root.position).sub(BAG_GRIP.clone().applyAxisAngle(new T.Vector3(0,1,0),Math.PI/2));
@@ -151,7 +150,7 @@ export class LifeScene{
  get snapshot(){return{id:this.kind,phase:this.phase,stage:this.index,time:this.time,total:this.total,cancelled:this.cancelled,seatBlend:this.seatBlend,routeIndex:this.routeIndex,furnitureObstacles:this.movementObstacles,flowerCommitted:this.committed,bagOwner:this.owner,bagVisible:this.bagVisible,bagInstances:this.gift.parent?1:0,transferGap:this.transferGap,bagRotation:this.gift.rotation.y,boxVisible:this.giftBox.visible&&!!this.giftBox.parent,heartVisible:this.heart?.visible??false,supportGripError:this.supportGrip?.error,furnitureZ:this.furniture.position.z,anchor:this.anchor.toArray(),rootAttached:!!this.root.parent};}
  get movementObstacles(){return this.kind==='overtime'?officeObstacles({x:this.anchor.x,z:this.anchor.y},this.furniture.position.z):[];}
  obstaclesFor(actor:number){
-  if(this.kind==='gift')return this.giftBox.visible?[{a:{x:this.anchor.x+GIFT_BOX_POSITION.x,z:this.anchor.y+this.giftBoxZ},b:{x:this.anchor.x+GIFT_BOX_POSITION.x,z:this.anchor.y+this.giftBoxZ},radius:GIFT_BOX_RADIUS,kind:'gift-box'}]:[];
+  if(this.kind==='gift')return this.giftBox.visible?[{a:{x:this.anchor.x+GIFT_BOX_POSITION.x,z:this.anchor.y+GIFT_BOX_POSITION.z},b:{x:this.anchor.x+GIFT_BOX_POSITION.x,z:this.anchor.y+GIFT_BOX_POSITION.z},radius:GIFT_BOX_RADIUS,kind:'gift-box'}]:[];
   if(this.kind!=='overtime')return[];
   // YW alone may cross the chair/desk envelope to reach the authored seat.
   const contact=actor===1&&(this.cancelled?this.release<2&&this.clearViaSeat:['take-seats','sit','work','stand','leave-seats'].includes(this.phase));

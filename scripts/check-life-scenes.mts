@@ -49,8 +49,8 @@ for(const cancelPhase of [undefined,'enter','take-seats','work','stand','exit'])
  assert(done,'Shared-navigation office stuck '+cancelPhase);if(cancelPhase)assert(cancelled,'Cancel phase not reached '+cancelPhase);else assert.equal(corners.size,p.compact?2:4,'DJ did not complete safe route');assert.equal(f.world.snapshot.flowers,5);assert(!f.scene.getObjectByName('little-life-scene'));
 }
 // Gift box remains a real obstacle; close contact is enabled only for the kiss.
-for(const boxZ of [-3,4])for(const cancelPhase of [undefined,'unwrap','offer','receive','show','kiss','shy']){
- const f=fixture(true);const anchor=new T.Vector2(2,1);const a=new LifeScene('gift',f.actors,f.scene,f.world,f.move,f.walk,()=>{},anchor,undefined,undefined,false,boxZ);f.setActive(a);let done=false,cancelled=false,supportError:number|undefined;
+for(const cancelPhase of [undefined,'unwrap','offer','receive','show','kiss','shy']){
+ const f=fixture(true);const anchor=new T.Vector2(2,1);const a=new LifeScene('gift',f.actors,f.scene,f.world,f.move,f.walk,()=>{},anchor);f.setActive(a);let done=false,cancelled=false,supportError:number|undefined;
  for(let n=0;n<12000;n++){f.actors.forEach(f.walk);done=a.update(1/60);f.sync();const state=a.snapshot;supportError=state.supportGripError??supportError;
   if(state.bagOwner==='YW')assert(state.transferGap!<1e-6,'Shared-navigation handoff jumped');
   if(['kiss-approach','kiss','shy'].includes(a.phase))assert(!state.bagVisible,'Bag was not stowed before kiss');
