@@ -1,5 +1,6 @@
 import * as T from 'three';
 import * as C from 'cannon-es';
+import type {Obstacle,Point} from './navigation';
 import type {SlotId} from './characters';
 import appearances from './photo-props.json' with {type:'json'};
 
@@ -10,7 +11,7 @@ type Prop={
  kind:PropKind;actor:number;hand:Hand;visual:T.Group;socket:T.Group;center:T.Vector3;half:T.Vector3;
  held:boolean;body?:C.Body;pickupFrom:T.Vector3;pickupRotation:T.Quaternion;
 };
-type Recovery={origin:T.Vector2;heading:number;stage:'return'|'reach'|'lift'|'straighten'|'done';time:number;index:number;items:Prop[]};
+type Recovery={origin:T.Vector2;stand:T.Vector2;heading:number;stage:'return'|'reach'|'lift'|'straighten'|'done';time:number;index:number;items:Prop[]};
 type Move=(actor:PropActor,x:number,z:number,dt:number,speed:number)=>number;
 type Walk=(actor:PropActor,amount:number,time:number)=>void;
 const S=.035;
@@ -78,7 +79,7 @@ export class HandProps{
   if(!this.active||this.items.every(p=>!p.held))return;
   this.syncSockets();this.recovering=false;
   this.carryBlend=0;
-  this.recovery=this.actors.map(f=>({origin:new T.Vector2(f.x,f.z),heading:f.heading,stage:'return',time:0,index:0,items:[]}));
+  this.recovery=this.actors.map(f=>({origin:new T.Vector2(f.x,f.z),stand:new T.Vector2(f.x,f.z),heading:f.heading,stage:'return',time:0,index:0,items:[]}));
   for(const p of this.items){
    if(!p.held)continue;
    this.scene.attach(p.visual);p.held=false;
@@ -93,9 +94,9 @@ export class HandProps{
    p.body=body;this.world.addBody(body);this.recovery[p.actor].items.push(p);
   }
  }
- beginRecovery(){
+ beginRecovery(stands?:Point[]){
   if(!this.active||!this.items.some(p=>!p.held))return false;
-  this.recovering=true;
+  this.recovering=true;if(stands)this.recovery.forEach((r,i)=>r.stand.set(stands[i].x,stands[i].z));
   for(const r of this.recovery){r.stage=r.items.some(p=>!p.held)?'return':'done';r.time=0;r.index=r.items.findIndex(p=>!p.held);}
   return true;
  }
@@ -121,8 +122,8 @@ export class HandProps{
   for(let i=0;i<this.actors.length;i++){
    const f=this.actors[i],r=this.recovery[i];if(!r||r.stage==='done')continue;
    if(r.stage==='return'){
-    const d=Math.hypot(f.x-r.origin.x,f.z-r.origin.y);
-    if(d>.04){move(f,r.origin.x,r.origin.y,dt,d>4?2.2:1.7);walk(f,1,elapsed*1.5);continue;}
+    const d=Math.hypot(f.x-r.stand.x,f.z-r.stand.y);
+    if(d>.04){move(f,r.stand.x,r.stand.y,dt,d>4?2.2:1.7);walk(f,1,elapsed*1.5);continue;}
     r.stage='reach';r.time=0;
    }
    r.time+=dt;const p=r.items[r.index];
@@ -159,5 +160,13 @@ export class HandProps{
   this.active=false;this.recovering=false;this.recovery=[];
  }
  dispose(){this.reset();for(const p of this.items)p.visual.traverse(o=>{if(o instanceof T.Mesh){for(const m of Array.isArray(o.material)?o.material:[o.material])m.dispose();}});}
- get snapshot(){return {active:this.active,recovering:this.recovering,held:this.items.filter(p=>p.held).length,dropped:this.items.filter(p=>!p.held&&this.active).length,origins:this.recovery.map(r=>({position:r.origin.toArray(),stage:r.stage,index:r.index})),items:this.items.map(p=>({actor:p.actor,hand:p.hand,kind:p.kind,held:p.held,body:Boolean(p.body),position:p.visual.getWorldPosition(new T.Vector3()).toArray(),grip:p.socket.parent?p.socket.getWorldPosition(new T.Vector3()).toArray():null,grounded:p.body?Math.abs(p.body.velocity.y)<.12:false}))};}
+ /** Horizontal capsules preserve a fallen ski pole's long footprint. */
+ get heldCount(){return this.items.filter(p=>p.held).length;}
+ get obstacles():Obstacle[]{return this.items.filter(p=>this.active&&!p.held&&p.body).map(p=>{
+  const body=p.body!,q=new T.Quaternion(body.quaternion.x,body.quaternion.y,body.quaternion.z,body.quaternion.w);
+  const axes=[new T.Vector3(p.half.x,0,0),new T.Vector3(0,p.half.y,0),new T.Vector3(0,0,p.half.z)].map(v=>v.applyQuaternion(q));
+  axes.sort((a,b)=>Math.hypot(b.x,b.z)-Math.hypot(a.x,a.z));const v=axes[0];
+  return{a:{x:body.position.x-v.x,z:body.position.z-v.z},b:{x:body.position.x+v.x,z:body.position.z+v.z},radius:Math.hypot(axes[1].x,axes[1].z)+Math.hypot(axes[2].x,axes[2].z)+.12,owner:p.actor,kind:p.kind};
+ });}
+ get snapshot(){return {active:this.active,recovering:this.recovering,held:this.items.filter(p=>p.held).length,dropped:this.items.filter(p=>!p.held&&this.active).length,origins:this.recovery.map(r=>({position:r.origin.toArray(),stand:r.stand.toArray(),stage:r.stage,index:r.index})),items:this.items.map(p=>({actor:p.actor,hand:p.hand,kind:p.kind,held:p.held,body:Boolean(p.body),position:p.visual.getWorldPosition(new T.Vector3()).toArray(),grip:p.socket.parent?p.socket.getWorldPosition(new T.Vector3()).toArray():null,grounded:p.body?Math.abs(p.body.velocity.y)<.12:false}))};}
 }

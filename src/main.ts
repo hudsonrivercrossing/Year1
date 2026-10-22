@@ -13,6 +13,7 @@ import {loadShirtPrints,shirtPrint} from './shirt-prints';
 import {ActionScene,headPose} from './affection';
 import {ACTIONS,SEQUENCES,LIBRARY_GROUPS,AUTO_ACTIONS,chooseFresh,type ActionId,type SequenceId} from './action-library';
 import {LifeScene,LittleLifeWorld,isLifeAction,LIFE_ACTIONS} from './life-scenes';
+import {Navigator,findClearing,safePoint,segmentClear,distance as groundDistance,clearance as obstacleClearance,type Obstacle,type Clearing} from './navigation';
 import {HandProps} from './hand-props';
 import {waistBand} from './waist-band';
 import {mergeVertices} from 'three/addons/utils/BufferGeometryUtils.js';
@@ -61,6 +62,7 @@ function makeFigure(i:number):Figure{
  return {root,waist,heightOffset:0,footHeight,parts,legPivots,x:root.position.x,z:root.position.z,heading:root.rotation.y,target:new T.Vector2(root.position.x,root.position.z),pause:.4+Math.random()*2,speed:.8,decision:2,look:0,phase:Math.random()*10};
 }
 type Action=ActionId;
+const navigator=new Navigator();let staging:{action:Action;time:number;plan?:Clearing;escape?:Set<string>[]}|undefined;let interactionArena:Clearing|undefined;let dropTime=0;let recoveryAge=0;let recoveryStarted=false;let pickupEscapes:Set<string>[]|undefined;
 let lifeWorld:LittleLifeWorld|undefined;let encounter:ActionScene|LifeScene|undefined;let props:HandProps|undefined;let queue:Action[]=[];let sweet=false;
 let sequence:SequenceId|undefined;let cancelling=false;let autoInteractions=localStorage.getItem('little-world-surprises')!=='off';let nextAuto=45+Math.random()*25;const recentActions:Action[]=[];const recentSequences:SequenceId[]=[];
 let count=0;let mode:'build'|'ready'|'awakening'|'play'='build';let activity:Action|'wander'|'recover'='wander';let activityTime=0;let elapsed=0;let transitionTime=0;let automatic=false;
@@ -110,6 +112,7 @@ function renderCopy(){
  if(freeAssembly)freeAssembly.hintsEnabled=hintsOn;
 }
 function activityStatus(){
+ if(staging){status(t('先找块空地，靠近你。','A little space, just for us.'));return;}
  if(cancelling){status(t('歇一会，再捡起小东西。','A little pause, then our little things.'));return;}
  if(activity==='recover'){status(t('先回去，把小东西捡起来。','Back for our little things.'));return;}
  status(activity==='wander'?'':t(...ACTIONS[activity].copy));
@@ -163,7 +166,7 @@ function showNext(){
 let autoTimer:ReturnType<typeof setTimeout>|undefined;
 function autoBuild(){if(!automatic||mode!=='build')return;attach();if(mode==='build')autoTimer=setTimeout(autoBuild,350);else automatic=false;}
 function attach(){if(mode!=='build'||assemblyMode==='free'||count>=12)return;figures[Math.floor(count/6)].parts[slots[count%6].id].visible=true;count++;sounds.play('snap');showNext();}
-function reset(){lifeWorld?.reset();props?.reset();cancelling=false;sequence=undefined;recentActions.length=0;recentSequences.length=0;nextAuto=45+Math.random()*25;autoFraming=phoneView();encounter?.dispose();encounter=undefined;queue=[];sweet=false;freeAssembly?.destroy();freeAssembly=undefined;disposeClone(tray);disposeClone(ghost);tray=undefined;ghost=undefined;$('assembly-modes').hidden=false;for(const k of ['free','guided'])$('mode-'+k).setAttribute('aria-pressed',String(k===assemblyMode));automatic=false;if(autoTimer)clearTimeout(autoTimer);dragging=false;mode='build';activity='wander';activityTime=0;count=0;transitionTime=0;controls.enableRotate=false;controls.enableZoom=false;controls.target.set(0,1,0);for(let i=0;i<2;i++){const f=figures[i];f.root.position.set(phoneView()?0:i===0?-2:2,72*SCALE,phoneView()?(i===0?2.2:-2.2):0);f.root.rotation.set(0,phoneView()?Math.PI/2:0,0);f.x=f.root.position.x;f.z=f.root.position.z;f.heading=f.root.rotation.y;f.target.set(f.x,f.z);f.pause=.4+Math.random()*2;f.decision=1+Math.random()*3;f.phase=Math.random()*10;Object.values(f.parts).forEach(p=>p.visible=false);pose(f,0,0);}setSteps('build');setBuildView();showNext();renderCopy();}
+function reset(){recoveryStarted=false;pickupEscapes=undefined;staging=undefined;interactionArena=undefined;navigator.reset();lifeWorld?.reset();props?.reset();cancelling=false;sequence=undefined;recentActions.length=0;recentSequences.length=0;nextAuto=45+Math.random()*25;autoFraming=phoneView();encounter?.dispose();encounter=undefined;queue=[];sweet=false;freeAssembly?.destroy();freeAssembly=undefined;disposeClone(tray);disposeClone(ghost);tray=undefined;ghost=undefined;$('assembly-modes').hidden=false;for(const k of ['free','guided'])$('mode-'+k).setAttribute('aria-pressed',String(k===assemblyMode));automatic=false;if(autoTimer)clearTimeout(autoTimer);dragging=false;mode='build';activity='wander';activityTime=0;count=0;transitionTime=0;controls.enableRotate=false;controls.enableZoom=false;controls.target.set(0,1,0);for(let i=0;i<2;i++){const f=figures[i];f.root.position.set(phoneView()?0:i===0?-2:2,72*SCALE,phoneView()?(i===0?2.2:-2.2):0);f.root.rotation.set(0,phoneView()?Math.PI/2:0,0);f.x=f.root.position.x;f.z=f.root.position.z;f.heading=f.root.rotation.y;f.target.set(f.x,f.z);f.pause=.4+Math.random()*2;f.decision=1+Math.random()*3;f.phase=Math.random()*10;Object.values(f.parts).forEach(p=>p.visible=false);pose(f,0,0);}setSteps('build');setBuildView();showNext();renderCopy();}
 function setSteps(_step:string){/* The gift has no product navigation header. */}
 function guidedStatus(){status('');const button=$<HTMLButtonElement>('auto');if(button){button.disabled=automatic;button.textContent=automatic?t('拼装中…','Building…'):t('自动拼装','Build for me');}}
 function readyTools(){status('');$('tools').innerHTML=`<button class="primary" id="life">${t('让我们的小世界动起来','Bring our world to life')}</button><button id="reset">${t('再拼一次','Build again')}</button>`;$('life').onclick=awaken;$('reset').onclick=reset;}
@@ -199,7 +202,7 @@ function playTools(){
  $('tools').querySelectorAll<HTMLButtonElement>('[data-sequence]').forEach(button=>button.onclick=()=>{closeLibrary(true);startSequence(button.dataset.sequence as SequenceId);});
  $('surprise').onclick=()=>{closeLibrary(true);startSequence(chooseFresh(Object.keys(SEQUENCES) as SequenceId[],recentSequences,2)??'sweet');};
  $('surprises').onclick=()=>{autoInteractions=!autoInteractions;localStorage.setItem('little-world-surprises',autoInteractions?'on':'off');$('surprises').setAttribute('aria-checked',String(autoInteractions));};
- $('stop').onclick=()=>{if(activity==='recover'||cancelling)return;queue=[];sweet=false;sequence=undefined;cancelling=true;encounter?.cancel();if(!encounter)finishActivity();activityStatus();actionControls();};
+ $('stop').onclick=()=>{if(activity==='recover'||cancelling)return;queue=[];sweet=false;sequence=undefined;cancelling=true;staging=undefined;navigator.reset();encounter?.cancel();if(!encounter)finishActivity();activityStatus();actionControls();};
  $('reset').onclick=reset;$('rebuild-menu').onclick=reset;$('fit').onclick=fitView;renderCopy();actionControls();
 }
 function actionControls(){
@@ -208,24 +211,79 @@ function actionControls(){
  if($('stop')){$('stop').hidden=!busy;$<HTMLButtonElement>('stop').disabled=activity==='recover'||cancelling;$('stop').textContent=activity==='recover'?t('捡起小东西','Picking up…'):t('先歇一会','A little pause');}
  $('moments')?.classList.toggle('active',busy);
 }
-function startActivity(a:Action){if(mode!=='play'||activity!=='wander')return;sequence=undefined;sweet=false;props?.drop();beginActivity(a);}
-function startSequence(id:SequenceId){if(mode!=='play'||activity!=='wander')return;sequence=id;sweet=id==='sweet';recentSequences.push(id);if(recentSequences.length>6)recentSequences.shift();const steps=[...SEQUENCES[id].steps];queue=steps.slice(1);props?.drop();beginActivity(steps[0]);}
-function beginActivity(a:Action){
+function startActivity(a:Action){if(mode!=='play'||activity!=='wander')return;sequence=undefined;sweet=false;props?.drop();dropTime=elapsed;beginActivity(a);}
+function startSequence(id:SequenceId){if(mode!=='play'||activity!=='wander')return;sequence=id;sweet=id==='sweet';recentSequences.push(id);if(recentSequences.length>6)recentSequences.shift();const steps=[...SEQUENCES[id].steps];queue=steps.slice(1);props?.drop();dropTime=elapsed;beginActivity(steps[0]);}
+function beginActivity(a:Action){activity=a;activityTime=0;cancelling=false;interactionArena=undefined;staging={action:a,time:0};navigator.reset();activityStatus();actionControls();}
+function runActivity(a:Action){
+ staging=undefined;navigator.reset();
  activity=a;activityTime=0;cancelling=false;recentActions.push(a);if(recentActions.length>8)recentActions.shift();
  const center=figures.reduce((v,f)=>v.add(new T.Vector2(f.x,f.z)),new T.Vector2()).multiplyScalar(.5);
- encounter=isLifeAction(a)?new LifeScene(a,figures,scene,lifeWorld!,(f,x,z,dt,speed)=>moveTo(f as Figure,x,z,dt,speed),(f,amount)=>pose(f as Figure,amount,elapsed*1.3),cue=>sounds.play(cue)):new ActionScene(a,figures,scene,(f,x,z,dt,speed)=>moveTo(f as Figure,x,z,dt,speed),(f,amount)=>pose(f as Figure,amount,elapsed*1.3),cue=>sounds.play(cue),WORLD,queue.length>0,Math.atan2(camera.position.x-center.x,camera.position.z-center.y));
+ encounter=isLifeAction(a)?new LifeScene(a,figures,scene,lifeWorld!,(f,x,z,dt,speed)=>moveTo(f as Figure,x,z,dt,speed),(f,amount)=>pose(f as Figure,amount,elapsed*1.3),cue=>sounds.play(cue),interactionArena?new T.Vector2(interactionArena.center.x,interactionArena.center.z):undefined,interactionArena?.entryZ, a==='flower'?interactionArena?.points:undefined):new ActionScene(a,figures,scene,(f,x,z,dt,speed)=>moveTo(f as Figure,x,z,dt,speed),(f,amount)=>pose(f as Figure,amount,elapsed*1.3),cue=>sounds.play(cue),WORLD,queue.length>0,Math.atan2(camera.position.x-center.x,camera.position.z-center.y));
  activityStatus();actionControls();
 }
 function finishActivity(){
  encounter?.dispose();encounter=undefined;for(const f of figures)pose(f,0,elapsed);
- const next=queue.shift();if(next&&!cancelling){beginActivity(next);return;}
+ const next=queue.shift();if(next&&!cancelling){runActivity(next);return;}
  queue=[];sweet=false;sequence=undefined;cancelling=false;
- if(props?.beginRecovery()){activity='recover';activityStatus();actionControls();return;}
+ interactionArena=undefined;navigator.reset();
+ if((props?.snapshot.dropped??0)>0){activity='recover';recoveryAge=Math.min(1.1,elapsed-dropTime);recoveryStarted=false;pickupEscapes=undefined;if(recoveryAge>=1.1)startRecovery();activityStatus();actionControls();return;}
  resumeWander();
 }
-function resumeWander(){activity='wander';activityTime=0;nextAuto=45+Math.random()*25;for(const f of figures){pose(f,0,elapsed);f.pause=.4+Math.random()*2;f.look=f.heading;f.decision=.5+Math.random()*3;f.target.set(f.x,f.z);}activityStatus();actionControls();}
+function resumeWander(){pickupEscapes=undefined;recoveryStarted=false;activity='wander';activityTime=0;nextAuto=45+Math.random()*25;for(const f of figures){pose(f,0,elapsed);f.pause=.4+Math.random()*2;f.look=f.heading;f.decision=.5+Math.random()*3;f.target.set(f.x,f.z);}activityStatus();actionControls();}
 function pose(f:Figure,walk:number,t:number){f.heightOffset=0;f.waist.rotation.set(0,0,0);f.legPivots[0].rotation.x=Math.sin(t*8)*.42*walk;f.legPivots[1].rotation.x=-Math.sin(t*8)*.42*walk;f.parts.rightArm.rotation.set(-Math.sin(t*8)*.3*walk,0,-T.MathUtils.degToRad(9.782));f.parts.leftArm.rotation.set(Math.sin(t*8)*.3*walk,0,T.MathUtils.degToRad(9.782));headPose(f,0,Math.sin(t*.9)*.09);f.root.rotation.z=0;}
-function moveTo(f:Figure,x:number,z:number,dt:number,speed:number){const dx=x-f.x,dz=z-f.z,d=Math.hypot(dx,dz);if(d>.00001){const step=Math.min(d,speed*dt);f.x+=dx/d*step;f.z+=dz/d*step;const angle=Math.atan2(dx,dz);f.heading+=Math.atan2(Math.sin(angle-f.heading),Math.cos(angle-f.heading))*Math.min(1,dt*8);}return d;}
+function groundObstacles(owner?:number):Obstacle[]{
+ const flower=lifeWorld?.obstacle;
+ return [...(flower?[{a:{x:flower.x,z:flower.z},b:{x:flower.x,z:flower.z},radius:flower.radius,kind:'flower'}]:[]),...(props?.obstacles??[]).filter(o=>owner===undefined||o.owner!==owner)];
+}
+function movementObstacles(i:number){
+ const all=groundObstacles(activity==='recover'?i:undefined),f=figures[i];
+ if(activity==='recover'&&!recoveryStarted)return all.filter(o=>o.kind==='flower');
+ if(!staging&&activity!=='recover')return all;
+ // Falling pieces start beneath their owner's footprint. Step out once; once
+ // clear, the same accessory becomes solid for all remaining movement.
+ if(staging&&staging.time<1.1)return all.filter(o=>o.kind==='flower');
+ const escape=staging?.escape?.[i]??pickupEscapes?.[i];return all.filter(o=>{const key=o.owner+'-'+o.kind;if(!escape?.has(key))return true;if(obstacleClearance(f,o)>.9){escape.delete(key);return true;}return false;});
+}
+function pairClearance(){if(activity==='wander'||activity==='recover'&&(props?.heldCount??0)>0)return 2.35;if(!staging&&['hug','kiss'].includes(activity))return 1.01;if(!staging&&['look','approach'].includes(activity))return 1.42;return 1.72;}
+function moveTo(f:Figure,x:number,z:number,dt:number,speed:number){
+ const i=figures.indexOf(f),other=figures[1-i],d=Math.hypot(x-f.x,z-f.z),padding=activity==='wander'?.95:.72;
+ const obstacles=movementObstacles(i);
+ if(other)obstacles.push({a:{x:other.x,z:other.z},b:{x:other.x,z:other.z},radius:pairClearance()-padding,kind:'person'});
+ const end=navigator.step(f,{x,z},dt,speed,obstacles,WORLD,padding),dx=end.x-f.x,dz=end.z-f.z;
+ if(Math.hypot(dx,dz)>.00001){f.x=end.x;f.z=end.z;const angle=Math.atan2(dx,dz);f.heading+=Math.atan2(Math.sin(angle-f.heading),Math.cos(angle-f.heading))*Math.min(1,dt*8);}return d;
+}
+function recoveryStands(){
+ const origins=props?.snapshot.origins.map(r=>({x:r.position[0],z:r.position[1]}))??[];if(origins.length!==2)return undefined;
+ let stands=origins.map((p,i)=>safePoint(p,groundObstacles(i),WORLD,.88));
+ if(groundDistance(stands[0],stands[1])<2.45){const c={x:(origins[0].x+origins[1].x)/2,z:(origins[0].z+origins[1].z)/2};let score=Infinity;
+  for(let n=0;n<16;n++){const a=n*Math.PI/8,points=[-1,1].map((s,i)=>safePoint({x:c.x+s*Math.cos(a)*1.3,z:c.z+s*Math.sin(a)*1.3},groundObstacles(i),WORLD,.88));
+   const cost=groundDistance(points[0],origins[0])+groundDistance(points[1],origins[1]);if(groundDistance(points[0],points[1])>=2.45&&cost<score){stands=points;score=cost;}}
+ }return stands;
+}
+function startRecovery(){
+ pickupEscapes=figures.map(f=>new Set((props?.obstacles??[]).filter(o=>obstacleClearance(f,o)<1.05).map(o=>o.owner+'-'+o.kind)));
+ recoveryStarted=props?.beginRecovery(recoveryStands())??false;if(!recoveryStarted)resumeWander();
+}
+function updateStaging(dt:number){
+ const s=staging!;s.time+=dt;if(s.time<1.1)return;
+ if(!s.escape)s.escape=figures.map(f=>new Set((props?.obstacles??[]).filter(o=>obstacleClearance(f,o)<1.05).map(o=>o.owner+'-'+o.kind)));
+ if(!s.plan){
+  const fixed=s.action==='flower'&&lifeWorld?.planted?{x:lifeWorld.flowerPoint.x,z:lifeWorld.flowerPoint.y}:undefined;
+  const obstacles=groundObstacles().filter(o=>!fixed||o.kind!=='flower');
+  s.plan=findClearing(figures,obstacles,WORLD,isLifeAction(s.action)?s.action:'basic',fixed,{x:camera.position.z-controls.target.z,z:-(camera.position.x-controls.target.x)});
+  if(!s.plan)return;interactionArena=s.plan;
+  if(s.action==='flower'&&!lifeWorld!.planted)lifeWorld!.setFlowerPoint(s.plan.center.x,s.plan.center.z);
+ }
+ let arrived=true;
+ figures.forEach((f,i)=>{const p=s.plan!.points[i];if(Math.hypot(f.x-p.x,f.z-p.z)>.04){arrived=false;moveTo(f,p.x,p.z,dt,2);pose(f,.85,elapsed*1.5);}});
+ if(arrived)runActivity(s.action);
+}
+function resolvePeople(dt:number){
+ const[a,b]=figures,min=pairClearance(),d=Math.hypot(b.x-a.x,b.z-a.z);if(d>=min)return;
+ const x=d>.0001?(b.x-a.x)/d:1,z=d>.0001?(b.z-a.z)/d:0,step=Math.min((min-d)/2+.0001,dt*1.5);
+ figures.forEach((f,i)=>{const sign=i===0?-1:1,end={x:T.MathUtils.clamp(f.x+x*step*sign,-WORLD.wanderX,WORLD.wanderX),z:T.MathUtils.clamp(f.z+z*step*sign,-WORLD.wanderZ,WORLD.wanderZ)};if(segmentClear(f,end,movementObstacles(i),activity==='wander'?.95:.72)){f.x=end.x;f.z=end.z;}});
+}
+
 function chooseWander(f:Figure){
  const r=Math.random();f.decision=1.8+Math.random()*6;
  if(r<.26){f.pause=.5+Math.random()*3.5;f.look=f.heading+(Math.random()-.5)*2.2;f.target.set(f.x,f.z);return;}
@@ -241,25 +299,18 @@ function updateCharacters(dt:number){
    if(f.pause>0){f.pause-=dt;f.heading=T.MathUtils.damp(f.heading,f.look,2,dt);headPose(f,0,Math.sin(elapsed*1.3+f.phase)*.18);continue;}
    let distance=Math.hypot(f.target.x-f.x,f.target.y-f.z);
    if(distance<.15||f.decision<=0){chooseWander(f);continue;}
-   const next=new T.Vector2(f.target.x-f.x,f.target.y-f.z).normalize();
-   const away=new T.Vector2(f.x-other.x,f.z-other.z),separation=away.length();
-   if(separation<2.8){
-    if(separation<.001)away.set(i===0?-1:1,.3);
-    away.normalize();
-    const lateral=new T.Vector2(-away.y,away.x).multiplyScalar(i===0?.8:-.8);
-    next.addScaledVector(away,(2.8-separation)*2.5).add(lateral).normalize();
-   }
-   const flower=lifeWorld?.obstacle;if(flower){const awayFlower=new T.Vector2(f.x-flower.x,f.z-flower.z),d=awayFlower.length();if(d<flower.radius+1.2){if(d<.01)awayFlower.set(1,0);next.addScaledVector(awayFlower.normalize(),(flower.radius+1.2-d)*4).normalize();if(Math.hypot(f.target.x-flower.x,f.target.y-flower.z)<flower.radius+1)f.decision=0;}}
-   const step=Math.min(distance,f.speed*dt);
-   const x=T.MathUtils.clamp(f.x+next.x*step,-WORLD.wanderX,WORLD.wanderX),z=T.MathUtils.clamp(f.z+next.y*step,-WORLD.wanderZ,WORLD.wanderZ);
-   moveTo(f,x,z,dt,f.speed);pose(f,1,elapsed*f.speed+f.phase);
+   const safe=safePoint({x:f.target.x,z:f.target.y},groundObstacles(),WORLD,.95);f.target.set(safe.x,safe.z);
+   moveTo(f,f.target.x,f.target.y,dt,f.speed);pose(f,1,elapsed*f.speed+f.phase);
   }
   if(autoInteractions){nextAuto-=dt;if(nextAuto<=0){startActivity(chooseFresh(AUTO_ACTIONS,recentActions,3)??'look');}}
+ }else if(staging){updateStaging(dt);
  }else if(activity==='recover'){
-  if(props?.updateRecovery(dt,(f,x,z,delta,speed)=>moveTo(f as Figure,x,z,delta,speed),(f,amount,time)=>pose(f as Figure,amount,time),elapsed))resumeWander();
+  recoveryAge+=dt;if(!recoveryStarted&&recoveryAge>=1.1)startRecovery();
+  if(recoveryStarted&&props?.updateRecovery(dt,(f,x,z,delta,speed)=>moveTo(f as Figure,x,z,delta,speed),(f,amount,time)=>pose(f as Figure,amount,time),elapsed))resumeWander();
  }else{
   activityTime+=dt;if(encounter?.update(dt))finishActivity();
  }
+ resolvePeople(dt);
  for(const f of figures){f.root.position.set(f.x,72*SCALE+f.heightOffset,f.z);f.root.rotation.y=f.heading;}
  props?.updatePhysics(dt);
 }
@@ -311,10 +362,14 @@ function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta()
  renderer.render(scene,camera);
 }
 async function boot(){try{await loadShirtPrints(characters.map(d=>d.shirtPrint));await Promise.all(partIds.map(async id=>{const revision=characters.find(d=>d.hairPart===id)?.hairRevision;const response=await fetch(publicAsset(`models/${id}.json${revision?'?v='+revision:''}`));if(!response.ok)throw Error(`零件 ${id} 加载失败`);const data=await response.json() as Record<string,number[]>;const groups:Record<string,T.BufferGeometry>={};for(const [code,vertices] of Object.entries(data)){const transformed=vertices.map((v,i)=>v*SCALE*(i%3===0?1:-1));let geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(transformed,3));if(id==='yw-long-bangs-approx')geo=mergeVertices(geo,.0001);geo.computeVertexNormals();groups[code]=geo;}geometries.set(id,groups);}));figures.push(makeFigure(0),makeFigure(1));lifeWorld=new LittleLifeWorld(scene,part);props=new HandProps(scene,figures,part,speed=>sounds.play('drop',Math.min(1,speed/5)),WORLD);$('loading').hidden=true;showNext();frame();}catch(error){$('loading').innerHTML=`<p>${t('零件还没准备好。','The pieces are not ready yet.')}</p><button id="retry">${t('再试一次','Try again')}</button>`;status(String(error));$('retry').onclick=()=>location.reload();console.error(error);}}
-// Read-only inspection for local browser QA; eliminated from production builds.
-if(import.meta.env.DEV)Object.defineProperty(window,'__brickWorld',{get:()=>{
+// Local inspection and deterministic regression fixtures; eliminated from production builds.
+if(import.meta.env.DEV)Object.defineProperty(window,'__brickWorld',{set:(fixture:{positions:[number,number][];targets?:[number,number][];flower?:[number,number]})=>{
+ if(mode!=='play'||activity!=='wander'||fixture.positions?.length!==2)return;
+ fixture.positions.forEach(([x,z],i)=>{const f=figures[i];f.x=T.MathUtils.clamp(x,-WORLD.wanderX,WORLD.wanderX);f.z=T.MathUtils.clamp(z,-WORLD.wanderZ,WORLD.wanderZ);f.pause=fixture.targets?0:10;f.decision=100;f.target.set(...(fixture.targets?.[i]??[f.x,f.z] as [number,number]));f.root.position.set(f.x,72*SCALE,f.z);});
+ if(fixture.flower){lifeWorld!.reset();lifeWorld!.setFlowerPoint(...fixture.flower);lifeWorld!.plant();}navigator.reset();props?.updatePhysics(0);
+},get:()=>{
  const project=(v:T.Vector3)=>{const r=renderer.domElement.getBoundingClientRect();const p=v.clone().project(camera);return {x:r.left+(p.x*.5+.5)*r.width,y:r.top+(-p.y*.5+.5)*r.height};};
- return {life:lifeWorld?.snapshot,mode,assemblyMode,count,activity,sequence,cancelling,action:encounter?.snapshot??null,props:props?.snapshot??null,recentActions:[...recentActions],autoInteractions,nextAuto,autoFraming,effects:scene.children.filter(o=>o.name==='affection-heart').length,encounter:encounter?.phase??null,queue:[...queue],sweet,hintsOn,language:getLanguage(),sounds:sounds.snapshot,guided:tray&&ghost?{piece:project(tray.position),target:project(ghost.position)}:null,camera:{viewOffset:camera.view?.enabled?[camera.view.offsetX,camera.view.offsetY]:[0,0],position:camera.position.toArray(),target:controls.target.toArray(),azimuth:controls.getAzimuthalAngle(),polar:controls.getPolarAngle()},music:{enabled:music.enabled,paused:music.audio.paused,time:music.audio.currentTime,volume:music.audio.volume,loop:music.audio.loop,source:music.audio.currentSrc},world:WORLD,portraits:characters.map(d=>({head:d.headPart,hair:d.hairPart,skin:d.skin,legs:d.legs,hips:d.hips,shirt:d.shirtCatalog,print:d.shirtPrint})),figures:figures.map(f=>({waist:f.waist.rotation.toArray(),heightOffset:f.heightOffset,feetY:f.footHeight(f.legPivots[0].rotation.x)+f.heightOffset,legs:f.legPivots.map(p=>p.rotation.toArray()),screen:project(f.root.position),head:f.parts.head.rotation.toArray(),hair:f.parts.hair.rotation.toArray(),headPosition:f.parts.head.position.toArray(),hairPosition:f.parts.hair.position.toArray(),arms:[f.parts.rightArm.rotation.toArray(),f.parts.leftArm.rotation.toArray()],x:f.x,z:f.z,speed:f.speed,pause:f.pause,heading:f.heading,target:[f.target.x,f.target.y]})),pieces:freeAssembly?.pieces.map(p=>({character:p.character,slot:p.slot,attached:p.attached,held:p===freeAssembly?.holding,hintVisible:p.ghost.visible,highlighted:Boolean(p.ghost.userData.highlighted),eligible:freeAssembly!.eligible(p),position:p.visual.position.toArray(),velocity:p.body.velocity.toArray(),screen:project(p.visual.position),target:project(freeAssembly!.target(p))}))??[]};
+ return {life:lifeWorld?.snapshot,mode,assemblyMode,count,activity,sequence,cancelling,action:staging?{id:staging.action,phase:staging.plan?'relocate':'settle',time:staging.time,center:staging.plan?.center}:encounter?.snapshot??null,obstacles:groundObstacles(),arena:interactionArena,props:props?.snapshot??null,recentActions:[...recentActions],autoInteractions,nextAuto,autoFraming,effects:scene.children.filter(o=>o.name==='affection-heart').length,encounter:encounter?.phase??null,queue:[...queue],sweet,hintsOn,language:getLanguage(),sounds:sounds.snapshot,guided:tray&&ghost?{piece:project(tray.position),target:project(ghost.position)}:null,camera:{viewOffset:camera.view?.enabled?[camera.view.offsetX,camera.view.offsetY]:[0,0],position:camera.position.toArray(),target:controls.target.toArray(),azimuth:controls.getAzimuthalAngle(),polar:controls.getPolarAngle()},music:{enabled:music.enabled,paused:music.audio.paused,time:music.audio.currentTime,volume:music.audio.volume,loop:music.audio.loop,source:music.audio.currentSrc},world:WORLD,portraits:characters.map(d=>({head:d.headPart,hair:d.hairPart,skin:d.skin,legs:d.legs,hips:d.hips,shirt:d.shirtCatalog,print:d.shirtPrint})),figures:figures.map(f=>({waist:f.waist.rotation.toArray(),heightOffset:f.heightOffset,feetY:f.footHeight(f.legPivots[0].rotation.x)+f.heightOffset,legs:f.legPivots.map(p=>p.rotation.toArray()),screen:project(f.root.position),head:f.parts.head.rotation.toArray(),hair:f.parts.hair.rotation.toArray(),headPosition:f.parts.head.position.toArray(),hairPosition:f.parts.hair.position.toArray(),arms:[f.parts.rightArm.rotation.toArray(),f.parts.leftArm.rotation.toArray()],x:f.x,z:f.z,speed:f.speed,pause:f.pause,heading:f.heading,target:[f.target.x,f.target.y]})),pieces:freeAssembly?.pieces.map(p=>({character:p.character,slot:p.slot,attached:p.attached,held:p===freeAssembly?.holding,hintVisible:p.ghost.visible,highlighted:Boolean(p.ghost.userData.highlighted),eligible:freeAssembly!.eligible(p),position:p.visual.position.toArray(),velocity:p.body.velocity.toArray(),screen:project(p.visual.position),target:project(freeAssembly!.target(p))}))??[]};
 }});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLibrary(true);});
 document.addEventListener('pointerdown',e=>{if(e.target instanceof Element&&!e.target.closest('#moments'))closeLibrary();});
