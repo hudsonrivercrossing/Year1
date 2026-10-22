@@ -220,7 +220,7 @@ function runActivity(a:Action){
  staging=undefined;navigator.reset();
  activity=a;activityTime=0;cancelling=false;recentActions.push(a);if(recentActions.length>8)recentActions.shift();
  const center=figures.reduce((v,f)=>v.add(new T.Vector2(f.x,f.z)),new T.Vector2()).multiplyScalar(.5);
- encounter=isLifeAction(a)?new LifeScene(a,figures,scene,lifeWorld!,(f,x,z,dt,speed)=>moveTo(f as Figure,x,z,dt,speed),(f,amount)=>pose(f as Figure,amount,elapsed*1.3),cue=>sounds.play(cue),interactionArena?new T.Vector2(interactionArena.center.x,interactionArena.center.z):undefined,interactionArena?.entryZ, a==='flower'?interactionArena?.points:undefined):new ActionScene(a,figures,scene,(f,x,z,dt,speed)=>moveTo(f as Figure,x,z,dt,speed),(f,amount)=>pose(f as Figure,amount,elapsed*1.3),cue=>sounds.play(cue),WORLD,queue.length>0,Math.atan2(camera.position.x-center.x,camera.position.z-center.y));
+ encounter=isLifeAction(a)?new LifeScene(a,figures,scene,lifeWorld!,(f,x,z,dt,speed)=>moveTo(f as Figure,x,z,dt,speed),(f,amount)=>pose(f as Figure,amount,elapsed*1.3),cue=>sounds.play(cue),interactionArena?new T.Vector2(interactionArena.center.x,interactionArena.center.z):undefined,interactionArena?.entryZ, a==='flower'?interactionArena?.points:undefined,interactionArena?.compact):new ActionScene(a,figures,scene,(f,x,z,dt,speed)=>moveTo(f as Figure,x,z,dt,speed),(f,amount)=>pose(f as Figure,amount,elapsed*1.3),cue=>sounds.play(cue),WORLD,queue.length>0,Math.atan2(camera.position.x-center.x,camera.position.z-center.y));
  activityStatus();actionControls();
 }
 function finishActivity(){
@@ -248,7 +248,7 @@ function movementObstacles(i:number){
 function pairClearance(){if(activity==='wander'||activity==='recover'&&(props?.heldCount??0)>0)return 2.35;if(!staging&&['hug','kiss'].includes(activity))return 1.01;if(!staging&&['look','approach'].includes(activity))return 1.42;return 1.72;}
 function moveTo(f:Figure,x:number,z:number,dt:number,speed:number){
  const i=figures.indexOf(f),other=figures[1-i],d=Math.hypot(x-f.x,z-f.z),padding=activity==='wander'?.95:.72;
- const obstacles=movementObstacles(i);
+ const obstacles=movementObstacles(i);if(encounter instanceof LifeScene)obstacles.push(...encounter.obstaclesFor(i));
  if(other)obstacles.push({a:{x:other.x,z:other.z},b:{x:other.x,z:other.z},radius:pairClearance()-padding,kind:'person'});
  const end=navigator.step(f,{x,z},dt,speed,obstacles,WORLD,padding),dx=end.x-f.x,dz=end.z-f.z;
  if(Math.hypot(dx,dz)>.00001){f.x=end.x;f.z=end.z;const angle=Math.atan2(dx,dz);f.heading+=Math.atan2(Math.sin(angle-f.heading),Math.cos(angle-f.heading))*Math.min(1,dt*8);}return d;
@@ -284,7 +284,7 @@ function updateStaging(dt:number){
 function resolvePeople(dt:number){
  const[a,b]=figures,min=pairClearance(),d=Math.hypot(b.x-a.x,b.z-a.z);if(d>=min)return;
  const x=d>.0001?(b.x-a.x)/d:1,z=d>.0001?(b.z-a.z)/d:0,step=Math.min((min-d)/2+.0001,dt*1.5);
- figures.forEach((f,i)=>{const sign=i===0?-1:1,end={x:T.MathUtils.clamp(f.x+x*step*sign,-WORLD.wanderX,WORLD.wanderX),z:T.MathUtils.clamp(f.z+z*step*sign,-WORLD.wanderZ,WORLD.wanderZ)};if(segmentClear(f,end,movementObstacles(i),activity==='wander'?.95:.72)){f.x=end.x;f.z=end.z;}});
+ figures.forEach((f,i)=>{const sign=i===0?-1:1,end={x:T.MathUtils.clamp(f.x+x*step*sign,-WORLD.wanderX,WORLD.wanderX),z:T.MathUtils.clamp(f.z+z*step*sign,-WORLD.wanderZ,WORLD.wanderZ)};if(segmentClear(f,end,[...movementObstacles(i),...(encounter instanceof LifeScene?encounter.obstaclesFor(i):[])],activity==='wander'?.95:.72)){f.x=end.x;f.z=end.z;}});
 }
 
 function chooseWander(f:Figure){
@@ -366,9 +366,10 @@ function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta()
 }
 async function boot(){try{await loadShirtPrints(characters.map(d=>d.shirtPrint));await Promise.all(partIds.map(async id=>{const revision=characters.find(d=>d.hairPart===id)?.hairRevision;const response=await fetch(publicAsset(`models/${id}.json${revision?'?v='+revision:''}`));if(!response.ok)throw Error(`零件 ${id} 加载失败`);const data=await response.json() as Record<string,number[]>;const groups:Record<string,T.BufferGeometry>={};for(const [code,vertices] of Object.entries(data)){const transformed=vertices.map((v,i)=>v*SCALE*(i%3===0?1:-1));let geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(transformed,3));if(id==='yw-long-bangs-approx')geo=mergeVertices(geo,.0001);geo.computeVertexNormals();groups[code]=geo;}geometries.set(id,groups);}));figures.push(makeFigure(0),makeFigure(1));lifeWorld=new LittleLifeWorld(scene,part);props=new HandProps(scene,figures,part,speed=>sounds.play('drop',Math.min(1,speed/5)),WORLD);$('loading').hidden=true;showNext();frame();}catch(error){$('loading').innerHTML=`<p>${t('零件还没准备好。','The pieces are not ready yet.')}</p><button id="retry">${t('再试一次','Try again')}</button>`;status(String(error));$('retry').onclick=()=>location.reload();console.error(error);}}
 // Local inspection and deterministic regression fixtures; eliminated from production builds.
-if(import.meta.env.DEV)Object.defineProperty(window,'__brickWorld',{set:(fixture:{positions:[number,number][];targets?:[number,number][];flower?:[number,number]})=>{
+if(import.meta.env.DEV)Object.defineProperty(window,'__brickWorld',{set:(fixture:{positions:[number,number][];targets?:[number,number][];flower?:[number,number];flowers?:[number,number][]})=>{
  if(mode!=='play'||activity!=='wander'||fixture.positions?.length!==2)return;
  fixture.positions.forEach(([x,z],i)=>{const f=figures[i];f.x=T.MathUtils.clamp(x,-WORLD.wanderX,WORLD.wanderX);f.z=T.MathUtils.clamp(z,-WORLD.wanderZ,WORLD.wanderZ);f.pause=fixture.targets?0:10;f.decision=100;f.target.set(...(fixture.targets?.[i]??[f.x,f.z] as [number,number]));f.root.position.set(f.x,72*SCALE,f.z);});
+ if(fixture.flowers){lifeWorld!.reset();for(const [x,z] of fixture.flowers.slice(0,5)){lifeWorld!.prepareFlower(()=>0);lifeWorld!.setFlowerPoint(x,z);lifeWorld!.plant();}}
  if(fixture.flower){lifeWorld!.reset();lifeWorld!.setFlowerPoint(...fixture.flower);lifeWorld!.plant();}navigator.reset();props?.updatePhysics(0);
 },get:()=>{
  const project=(v:T.Vector3)=>{const r=renderer.domElement.getBoundingClientRect();const p=v.clone().project(camera);return {x:r.left+(p.x*.5+.5)*r.width,y:r.top+(-p.y*.5+.5)*r.height};};

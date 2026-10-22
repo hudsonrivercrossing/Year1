@@ -7,7 +7,7 @@ async page=>{
  const recover=async()=>{await page.waitForFunction(()=>window.__brickWorld.activity==='wander',null,{timeout:90000});const s=await read();assert(s.props.held===4&&!s.props.dropped&&!s.cancelling&&!s.action,'Recovery failed');assert(s.figures.every(f=>Math.abs(f.heightOffset)<.001),'Seated pose leaked');};
  for(const [id,phase]of[['overtime','work'],['flower','admire'],['gift','show']]){
   await start(id);await page.waitForFunction(phase=>window.__brickWorld.action?.phase===phase,phase,{timeout:60000});let s=await read();assert(s.props.held===0&&s.props.dropped===4,'Original props still held '+id);
-  if(id==='overtime')assert(s.action.seatBlend===1&&s.figures.every(f=>Math.abs(f.legs[0][0]+Math.PI/2)<.01),'Not seated');
+  if(id==='overtime')assert(s.action.seatBlend===1&&Math.abs(s.figures[1].legs[0][0]+Math.PI/2)<.01&&Math.abs(s.figures[0].heightOffset)<.001,'Not seated');
   if(id==='flower')assert(s.life.flowers===1,'Flower not planted');
   if(id==='gift')assert(s.action.bagOwner==='YW'&&s.action.bagInstances===1&&s.action.transferGap<1e-6,'Gift handoff failed');
   await page.screenshot({path:`output/playwright/life-${id}-phone.png`});
@@ -17,8 +17,8 @@ async page=>{
   }
   await recover();results.push({id,normal:true});
  }
- // Unique flower persists through other scenes, and repeated planting tends it.
- await start('flower');await page.waitForFunction(()=>window.__brickWorld.action?.phase==='tend',null,{timeout:60000});await page.locator('#stop').click();await recover();assert((await read()).life.flowers===1,'Cancelled tending removed flower');
+ // Planting again adds a second persistent flower.
+ await start('flower');await page.waitForFunction(()=>window.__brickWorld.action?.phase==='admire',null,{timeout:60000});await page.locator('#stop').click();await recover();assert((await read()).life.flowers===2,'Cancelled planting lost committed flower');
  for(const [id,phase]of[['overtime','sit'],['gift','receive']]){await start(id);await page.waitForFunction(phase=>window.__brickWorld.action?.phase===phase,phase,{timeout:60000});await page.locator('#stop').click();await recover();results.push({id,cancelledAt:phase});}
  for(const view of [{width:320,height:568},{width:430,height:932},{width:844,height:390}]){
   await page.setViewportSize(view);await page.locator('#moments summary').click();await page.locator('#library-tab-life').click();

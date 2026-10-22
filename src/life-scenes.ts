@@ -1,6 +1,7 @@
 import * as T from 'three';
 import {headPose,type Actor} from './affection';
 import type {Point} from './navigation';
+import {officeObstacles,OFFICE_ROUTE} from './office-layout';
 import type {SoundCue} from './sound-effects';
 import grips from './photo-props.json' with {type:'json'};
 
@@ -65,12 +66,12 @@ export class LifeScene{
  private root=new T.Group();private furniture=new T.Group();private laptop=new T.Group();private lid=new T.Group();private gift=new T.Group();private seed=new T.Group();
  private index=0;private time=0;private total=0;private done=false;private cancelled=false;private release=0;private committed=false;private owner:'DJ'|'YW'='DJ';private tick=0;
  private anchor:T.Vector2;private entryZ:number;private cancelGiftPosition=new T.Vector3();private clearViaSeat=false;private exitFrom=-13;private saved?:{height:number;legs:number[];arms:number[];waist:number}[];
- private stages:Stage[];private seatBlend=0;private bagVisible=false;private transferGap:number|undefined;
- constructor(readonly kind:LifeId,private actors:Actor[],private scene:T.Scene,private world:LittleLifeWorld,private move:Move,private walk:(f:Actor,k:number)=>void,private sound:(cue:SoundCue)=>void,anchor?:T.Vector2,entryZ=-13,flowerStands?:Point[]){
+ private routeIndex=0;private routePause=0;private stages:Stage[];private seatBlend=0;private bagVisible=false;private transferGap:number|undefined;
+ constructor(readonly kind:LifeId,private actors:Actor[],private scene:T.Scene,private world:LittleLifeWorld,private move:Move,private walk:(f:Actor,k:number)=>void,private sound:(cue:SoundCue)=>void,anchor?:T.Vector2,entryZ=-13,flowerStands?:Point[],private officeCompact=false){
   this.anchor=anchor??(kind==='flower'?world.flowerPoint.clone():new T.Vector2());this.entryZ=entryZ;this.root.position.set(this.anchor.x,0,this.anchor.y);
   this.root.name='little-life-scene';scene.add(this.root);
   if(kind==='overtime'){
-   this.buildOffice();this.stages=[{name:'make-room',points:[[-3,-3],[3,-3]]},{name:'enter',duration:2},{name:'beside-seats',points:[[-3,-1.65],[3,-1.65]]},{name:'take-seats',points:[[-1.35,-1.65],[1.35,-1.65]]},{name:'sit',duration:1},{name:'work',duration:5.5},{name:'stand',duration:1},{name:'leave-seats',points:[[-3,-1.65],[3,-1.65]]},{name:'clear',points:[[-3,-3],[3,-3]]},{name:'exit',duration:2}];
+   this.buildOffice();this.stages=[{name:'make-room',points:[[-3.8,-3.6],[3.8,-3.6]]},{name:'enter',duration:2},{name:'beside-seats',points:[[-3.8,-3.6],[0,-3.6]]},{name:'take-seats',points:[[-3.8,-3.6],[0,-1.65]]},{name:'sit',duration:1},{name:'work',duration:18},{name:'stand',duration:1},{name:'leave-seats',points:[[-3.8,-3.6],[0,-3.6]]},{name:'clear',points:[[-3.8,-3.6],[3.8,-3.6]]},{name:'exit',duration:2}];
   }else if(kind==='flower'){
    this.seed.add(world.make('24866',FLOWER_STYLES[world.selectedId].color));this.root.add(this.seed);this.seed.visible=!world.planted;
    this.stages=[{name:'approach',points:flowerStands?flowerStands.map(p=>[p.x-this.anchor.x,p.z-this.anchor.y]):[[-1.1,1.6],[1.1,1.6]]},{name:'reveal',duration:1.2},{name:world.planted?'flower-dance':'plant',duration:world.planted?5.5:2.4},{name:'admire',duration:3},{name:'release',duration:.8}];
@@ -82,7 +83,7 @@ export class LifeScene{
   const make=this.world.make;this.root.add(this.furniture);this.furniture.position.z=this.entryZ;this.furniture.rotation.y=Math.PI;
   const top=make('3032','#bca58a');top.position.y=1.96;this.furniture.add(top);
   for(const x of [-1.75,1.75])for(const z of [-.98])for(const y of [.84,1.68]){const leg=make('3005','#e0d8c6');leg.position.set(x,y,z);this.furniture.add(leg);}
-  for(const x of [-1.35,1.35]){
+  for(const x of [0]){
    const chair=make('4079','#8a9b9b');chair.position.set(x,.89,1.65);chair.rotation.y=Math.PI;this.furniture.add(chair);
    const pedestal=make('3005','#b9b4a6');pedestal.position.set(x,.56,1.65);this.furniture.add(pedestal);
   }
@@ -104,11 +105,18 @@ export class LifeScene{
   const clasp=originalBox(.09,.13,.035,'#d7b66e');clasp.position.set(0,.52,.365);this.gift.add(clasp);
  }
  get phase(){return this.done?'done':this.cancelled?this.release<1?'release':this.release<2?'clear':'exit':this.stages[this.index]?.name??'done';}
- get snapshot(){return{id:this.kind,phase:this.phase,stage:this.index,time:this.time,total:this.total,cancelled:this.cancelled,seatBlend:this.seatBlend,flowerCommitted:this.committed,bagOwner:this.owner,bagVisible:this.bagVisible,bagInstances:this.gift.parent?1:0,transferGap:this.transferGap,bagRotation:this.gift.rotation.y,furnitureZ:this.furniture.position.z,anchor:this.anchor.toArray(),rootAttached:!!this.root.parent};}
+ get snapshot(){return{id:this.kind,phase:this.phase,stage:this.index,time:this.time,total:this.total,cancelled:this.cancelled,seatBlend:this.seatBlend,routeIndex:this.routeIndex,furnitureObstacles:this.movementObstacles,flowerCommitted:this.committed,bagOwner:this.owner,bagVisible:this.bagVisible,bagInstances:this.gift.parent?1:0,transferGap:this.transferGap,bagRotation:this.gift.rotation.y,furnitureZ:this.furniture.position.z,anchor:this.anchor.toArray(),rootAttached:!!this.root.parent};}
+ get movementObstacles(){return this.kind==='overtime'?officeObstacles({x:this.anchor.x,z:this.anchor.y},this.furniture.position.z):[];}
+ obstaclesFor(actor:number){
+  if(this.kind!=='overtime')return[];
+  // YW alone may cross the chair/desk envelope to reach the authored seat.
+  const contact=actor===1&&(this.cancelled?this.release<2&&this.clearViaSeat:['take-seats','sit','work','stand','leave-seats'].includes(this.phase));
+  return contact?[]:this.movementObstacles;
+ }
  private advance(){this.index++;this.time=0;}
  private positions(points:number[][],dt:number){let arrived=true;this.actors.forEach((f,i)=>{const x=points[i][0]+this.anchor.x,z=points[i][1]+this.anchor.y,d=Math.hypot(f.x-x,f.z-z);if(d>.03){arrived=false;this.move(f,x,z,dt,2.4);this.walk(f,.85);}});return arrived;}
- private face(dt:number){this.actors.forEach((f,i)=>turn(f,this.kind==='overtime'?0:this.kind==='flower'?Math.atan2(this.world.flowerPoint.x-f.x,this.world.flowerPoint.y-f.z):i===0?Math.PI/2:-Math.PI/2,dt));}
- private seated(k:number){this.seatBlend=k;this.actors.forEach((f,i)=>{f.legPivots.forEach(p=>p.rotation.x=-Math.PI/2*k);f.heightOffset=-.23*k;f.parts.rightArm.rotation.x=(i===1?-1.6:-.7)*k;f.parts.leftArm.rotation.x=(i===0?-1.6:-.7)*k;headPose(f,.05*k);});}
+ private face(dt:number){this.actors.forEach((f,i)=>{if(this.kind==='overtime'&&i===0&&this.phase==='work')return;turn(f,this.kind==='overtime'?0:this.kind==='flower'?Math.atan2(this.world.flowerPoint.x-f.x,this.world.flowerPoint.y-f.z):i===0?Math.PI/2:-Math.PI/2,dt);});}
+ private seated(k:number){this.seatBlend=k;this.actors.forEach((f,i)=>{if(i===0)return;f.legPivots.forEach(p=>p.rotation.x=-Math.PI/2*k);f.heightOffset=-.23*k;f.parts.rightArm.rotation.x=-1.6*k;f.parts.leftArm.rotation.x=-1.6*k;headPose(f,.05*k);});}
  private updateRoots(){for(const f of this.actors){f.root.position.set(f.x,2.52+f.heightOffset,f.z);f.root.rotation.y=f.heading;}this.scene.updateMatrixWorld(true);}
  private holdGift(position:T.Vector3){this.gift.position.copy(position).add(new T.Vector3(-this.anchor.x,-1.08,-this.anchor.y));this.gift.rotation.set(0,0,0);}
  cancel(){
@@ -118,7 +126,7 @@ export class LifeScene{
  private cancelUpdate(dt:number){
   this.time+=dt;
   if(this.release===0){const k=1-ease(this.time/.8);this.actors.forEach((f,i)=>{const s=this.saved![i];f.heightOffset=s.height*k;f.legPivots.forEach((p,j)=>p.rotation.x=s.legs[j]*k);f.parts.rightArm.rotation.x=s.arms[0]*k;f.parts.leftArm.rotation.x=s.arms[1]*k;f.waist.rotation.x=s.waist*k;});this.updateRoots();if(this.kind==='gift'&&this.bagVisible){const hand=palm(this.actors[this.owner==='DJ'?0:1],this.owner==='DJ'?'leftArm':'rightArm').add(new T.Vector3(-this.anchor.x,-1.08,-this.anchor.y));this.gift.position.lerpVectors(this.cancelGiftPosition,hand,ease(this.time/.6));if(this.time>.6){this.gift.visible=false;this.bagVisible=false;}}if(this.time>=.8){this.seed.visible=false;this.release=1;this.time=0;}}
-  else if(this.release===1){if(this.kind!=='overtime'||Math.abs(this.exitFrom-this.entryZ)<.01){this.release=2;this.time=0;}else if(this.clearViaSeat){if(this.positions([[-3,-1.65],[3,-1.65]],dt))this.clearViaSeat=false;}else if(this.positions([[-3,-3],[3,-3]],dt)){this.release=2;this.time=0;}}
+  else if(this.release===1){if(this.kind!=='overtime'||Math.abs(this.exitFrom-this.entryZ)<.01){this.release=2;this.time=0;}else if(this.clearViaSeat){if(this.positions([[-3.8,-3.6],[0,-3.6]],dt))this.clearViaSeat=false;}else if(this.positions([[-3.8,-3.6],[3.8,-3.6]],dt)){this.release=2;this.time=0;}}
   else{if(this.kind==='overtime')this.furniture.position.z=T.MathUtils.lerp(this.exitFrom,this.entryZ,ease(this.time/1.8));if(this.kind!=='overtime'||this.time>=1.8){this.dispose();return true;}}
   return false;
  }
@@ -130,7 +138,14 @@ export class LifeScene{
   if(this.kind==='overtime'){
    if(s.name==='enter')this.furniture.position.z=T.MathUtils.lerp(this.entryZ,0,ease(p));
    if(s.name==='sit')this.seated(ease(p));
-   if(s.name==='work'){this.seated(1);this.actors.forEach((f,i)=>{f.parts.rightArm.rotation.x+=Math.sin(this.time*12+i)*.065;f.parts.leftArm.rotation.x+=Math.cos(this.time*12+i)*.065;headPose(f,.04,Math.sin(this.time*1.4+i)*.1);});const beat=Math.floor(this.time*3);if(beat>this.tick){this.tick=beat;this.sound('type');}}
+   if(s.name==='work'){
+    this.seated(1);const[dj,yw]=this.actors;
+    yw.parts.rightArm.rotation.x+=Math.sin(this.time*12)*.065;yw.parts.leftArm.rotation.x+=Math.cos(this.time*12)*.065;headPose(yw,.04,Math.sin(this.time*1.4)*.06);
+    const route=this.officeCompact?[[-3.8,-3.6],[-3.8,1.3]]:OFFICE_ROUTE,point=route[this.routeIndex],x=this.anchor.x+point[0],z=this.anchor.y+point[1];
+    if(Math.hypot(dj.x-x,dj.z-z)<.06){this.routePause+=dt;turn(dj,Math.atan2(yw.x-dj.x,yw.z-dj.z),dt);headPose(dj,.03);if(this.routePause>.75){this.routePause=0;this.routeIndex=(this.routeIndex+1)%route.length;}}
+    else{this.move(dj,x,z,dt,3.3);this.walk(dj,.7);}
+    const beat=Math.floor(this.time*3);if(beat>this.tick){this.tick=beat;this.sound('type');}
+   }
    if(s.name==='stand'){this.seated(1-ease(p));this.lid.rotation.x=-1.08*(1-ease(p));}
    if(s.name==='exit')this.furniture.position.z=T.MathUtils.lerp(0,this.entryZ,ease(p));
   }else if(this.kind==='flower'){

@@ -9,7 +9,7 @@ original headers, dependency sources and CC BY information remain under
 | --- | --- |
 | Desk top | 3032, plate 4 × 6 |
 | Supports and chair pedestal | 3005, brick 1 × 1 |
-| Two chairs | 4079, minifigure seat 2 × 2 |
+| Single chair | 4079, minifigure seat 2 × 2 |
 | Laptop base/lid and flower base | 3068b, tile 2 × 2 |
 | Bag body brick | 3023 (redirects to 3023b), plate 1 × 2 |
 | Flower stem | 99249, flower stem with bar |
