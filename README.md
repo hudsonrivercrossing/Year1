@@ -76,14 +76,14 @@ A little world for our first year together. Build us, bring us to life, and stay
 
 ### 小小生活里的道具
 
-YW 加一会儿班，DJ 在桌边小跑陪伴；一起种下五朵花，种满后陪花跳支舞；还有 DJ 藏在身后的暖棕色小惊喜。
+YW 加一会儿班，DJ 在桌边小跑陪伴；一起种下五朵花，种满后陪花跳支舞；还有 DJ 藏在身后的暖棕色小惊喜。送爱马仕的故事留在文字里，场景使用标准 93091 手提包。
 
 <table align="center">
   <tr><td align="center" colspan="2"><img src="readme-assets/office-desk.png" alt="当前游戏里的办公桌、单把椅子与笔记本电脑" width="360"><br>加一会儿班 · A little overtime<br><sub>标准板砖与座椅组装；电脑屏幕和键盘为原创装饰</sub></td></tr>
   <tr><td align="center" colspan="2"><img src="readme-assets/flower-garden.png" alt="粉、黄、紫、白、蓝五种积木组合的纪念花" width="560"><br>我们的五朵花 · Five little flowers<br><sub>粉色、浅黄、淡紫、奶白、浅蓝；共用 3068b 底座、99249 花茎，以 24866 花瓣作五种刚性组合</sub></td></tr>
   <tr>
-    <td align="center"><img src="readme-assets/gift-bag.png" alt="暖棕色原创包，双圆提手、翻盖、皮带、金色扣件与缝线" width="250"><br>送你一只包 · A bag for you<br><sub>3023 基础板＋原创包身、提手、扣件与缝线</sub></td>
-    <td align="center"><img src="readme-assets/gift-box.png" alt="橙色礼盒与深棕缎带" width="250"><br>一点小惊喜 · A little surprise<br><sub>原创礼盒、盒盖与缎带；打开取包后收好</sub></td>
+    <td align="center"><img src="readme-assets/gift-bag.png" alt="标准 93091 手提包，暖棕色虚拟配色" width="250"><br>送你一只包 · A bag for you<br><sub>93091 标准手提包 · 暖棕色虚拟配色</sub></td>
+    <td align="center"><img src="readme-assets/gift-box.png" alt="标准砖拼成的空心橙色礼盒与深棕十字装饰" width="250"><br>一点小惊喜 · A little surprise<br><sub>3021／3010／3005／3069b 组合；打开取包后收好</sub></td>
   </tr>
 </table>
 

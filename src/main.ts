@@ -220,7 +220,7 @@ function runActivity(a:Action){
  staging=undefined;navigator.reset();
  activity=a;activityTime=0;cancelling=false;recentActions.push(a);if(recentActions.length>8)recentActions.shift();
  const center=figures.reduce((v,f)=>v.add(new T.Vector2(f.x,f.z)),new T.Vector2()).multiplyScalar(.5);
- encounter=isLifeAction(a)?new LifeScene(a,figures,scene,lifeWorld!,(f,x,z,dt,speed)=>moveTo(f as Figure,x,z,dt,speed),(f,amount)=>pose(f as Figure,amount,elapsed*1.3),cue=>sounds.play(cue),interactionArena?new T.Vector2(interactionArena.center.x,interactionArena.center.z):undefined,interactionArena?.entryZ, a==='flower'?interactionArena?.points:undefined,interactionArena?.compact):new ActionScene(a,figures,scene,(f,x,z,dt,speed)=>moveTo(f as Figure,x,z,dt,speed),(f,amount)=>pose(f as Figure,amount,elapsed*1.3),cue=>sounds.play(cue),WORLD,queue.length>0,Math.atan2(camera.position.x-center.x,camera.position.z-center.y));
+ encounter=isLifeAction(a)?new LifeScene(a,figures,scene,lifeWorld!,(f,x,z,dt,speed)=>moveTo(f as Figure,x,z,dt,speed),(f,amount)=>pose(f as Figure,amount,elapsed*1.3),cue=>sounds.play(cue),interactionArena?new T.Vector2(interactionArena.center.x,interactionArena.center.z):undefined,interactionArena?.entryZ, a==='flower'?interactionArena?.points:undefined,interactionArena?.compact,interactionArena?.giftBoxZ):new ActionScene(a,figures,scene,(f,x,z,dt,speed)=>moveTo(f as Figure,x,z,dt,speed),(f,amount)=>pose(f as Figure,amount,elapsed*1.3),cue=>sounds.play(cue),WORLD,queue.length>0,Math.atan2(camera.position.x-center.x,camera.position.z-center.y));
  activityStatus();actionControls();
 }
 function finishActivity(){

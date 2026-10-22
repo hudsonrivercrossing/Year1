@@ -1,7 +1,7 @@
 /** Stable part IDs + attachment transforms; swap geometry without rewriting behavior. */
 import definitions from './character-definitions.json';
 export const characters = definitions;
-export const partIds = ['3032','3005','4079','3023','3069b','3068b','3024','99249','24866','yw-long-bangs-approx','99930','3626cp8r','90540','3899','33120','3626cp8y','3626cp01','973','3815','3816','3817','3818','3819','3820','3901','87991','4530'];
+export const partIds = ['93091','3021','3010','3032','3005','4079','3023','3069b','3068b','3024','99249','24866','yw-long-bangs-approx','99930','3626cp8r','90540','3899','33120','3626cp8y','3626cp01','973','3815','3816','3817','3818','3819','3820','3901','87991','4530'];
 export const slots = [
  {id:'legs', label:'双腿组件', hint:'先搭稳脚步'},
  {id:'torso', label:'躯干', hint:'把身体放到双腿上'},

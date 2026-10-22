@@ -1,8 +1,9 @@
 import * as T from 'three';
 import {headPose,type Actor} from './affection';
 import type {Point} from './navigation';
+import {giftUnwrapPoint} from './gift-layout';
 import {officeObstacles,OFFICE_ROUTE} from './office-layout';
-import {makeGiftBag,makeGiftBox,makeSmallHeart} from './gift-model';
+import {makeGiftBag,makeGiftBox,makeSmallHeart,BAG_GRIP,BAG_SUPPORT,BAG_IN_BOX,GIFT_BOX_POSITION,GIFT_BOX_RADIUS} from './gift-model';
 import type {SoundCue} from './sound-effects';
 import grips from './photo-props.json' with {type:'json'};
 
@@ -68,7 +69,7 @@ export class LifeScene{
  private index=0;private time=0;private total=0;private done=false;private cancelled=false;private release=0;private committed=false;private owner:'DJ'|'YW'='DJ';private tick=0;
  private anchor:T.Vector2;private entryZ:number;private cancelGiftPosition=new T.Vector3();private clearViaSeat=false;private exitFrom=-13;private saved?:{height:number;legs:number[];arms:number[];waist:number}[];
  private routeIndex=0;private routePause=0;private stages:Stage[];private seatBlend=0;private bagVisible=false;private transferGap:number|undefined;
- constructor(readonly kind:LifeId,private actors:Actor[],private scene:T.Scene,private world:LittleLifeWorld,private move:Move,private walk:(f:Actor,k:number)=>void,private sound:(cue:SoundCue)=>void,anchor?:T.Vector2,entryZ=-13,flowerStands?:Point[],private officeCompact=false){
+ constructor(readonly kind:LifeId,private actors:Actor[],private scene:T.Scene,private world:LittleLifeWorld,private move:Move,private walk:(f:Actor,k:number)=>void,private sound:(cue:SoundCue)=>void,anchor?:T.Vector2,entryZ=-13,flowerStands?:Point[],private officeCompact=false,private giftBoxZ:number=GIFT_BOX_POSITION.z){
   this.anchor=anchor??(kind==='flower'?world.flowerPoint.clone():new T.Vector2());this.entryZ=entryZ;this.root.position.set(this.anchor.x,0,this.anchor.y);
   this.root.name='little-life-scene';scene.add(this.root);
   if(kind==='overtime'){
@@ -77,7 +78,7 @@ export class LifeScene{
    this.seed.add(world.make('24866',FLOWER_STYLES[world.selectedId].color));this.root.add(this.seed);this.seed.visible=!world.planted;
    this.stages=[{name:'approach',points:flowerStands?flowerStands.map(p=>[p.x-this.anchor.x,p.z-this.anchor.y]):[[-1.1,1.6],[1.1,1.6]]},{name:'reveal',duration:1.2},{name:world.planted?'flower-dance':'plant',duration:world.planted?5.5:2.4},{name:'admire',duration:3},{name:'release',duration:.8}];
   }else{
-   this.buildGift();this.stages=[{name:'unwrap-approach',points:[[-2.5,-1.7],[1.4,1]]},{name:'unwrap',duration:1.4},{name:'tuck-away',duration:.7},{name:'approach',points:[[-1.3,1],[1.3,1]]},{name:'curious',duration:1.1},{name:'hide-turn',duration:1.1},{name:'reveal',duration:1.4},{name:'offer',duration:1.2},{name:'receive',duration:1.2},{name:'show',duration:3.2},{name:'stow',duration:1},{name:'kiss-approach',points:[[-.54,1],[.54,1]]},{name:'kiss',duration:2.2},{name:'shy-space',points:[[-1.2,1],[1.2,1]]},{name:'shy',duration:2.3},{name:'separate',points:[[-1.4,1],[1.4,1]]},{name:'release',duration:.65}];
+   this.buildGift();this.stages=[{name:'unwrap-approach',points:[[giftUnwrapPoint(this.giftBoxZ).x,giftUnwrapPoint(this.giftBoxZ).z],[1.4,1]]},{name:'unwrap',duration:2.2},{name:'tuck-away',duration:.7},{name:'approach',points:[[-1.3,1],[1.3,1]]},{name:'curious',duration:1.1},{name:'hide-turn',duration:1.1},{name:'reveal',duration:1.4},{name:'offer',duration:1.2},{name:'receive',duration:1.2},{name:'show',duration:3.2},{name:'stow',duration:1},{name:'kiss-approach',points:[[-.54,1],[.54,1]]},{name:'kiss',duration:2.2},{name:'shy-space',points:[[-1.2,1],[1.2,1]]},{name:'shy',duration:2.3},{name:'separate',points:[[-1.4,1],[1.4,1]]},{name:'release',duration:.65}];
   }
  }
  private buildOffice(){
@@ -97,12 +98,12 @@ export class LifeScene{
  }
  private buildGift(){
   this.gift=makeGiftBag(this.world.make);this.gift.visible=false;this.root.add(this.gift);
-  const box=makeGiftBox();this.giftBox=box.root;this.boxLid=box.lid;this.root.add(this.giftBox);
+  const box=makeGiftBox(this.world.make,this.giftBoxZ);this.giftBox=box.root;this.boxLid=box.lid;this.root.add(this.giftBox);
   this.heart=makeSmallHeart();this.heart.visible=false;this.root.add(this.heart);
  }
  private event(id:string,cue:SoundCue){if(this.events.has(id))return;this.events.add(id);this.sound(cue);}
  private supportHand(){
-  const actor=this.actors[0],arm=actor.parts.rightArm,target=this.gift.localToWorld(new T.Vector3(-.26,1.08,.2));
+  const actor=this.actors[0],arm=actor.parts.rightArm,target=this.gift.localToWorld(BAG_SUPPORT.clone());
   let x=-1.12,z=.4,error=Infinity;
   for(let step=.4;step>.02;step*=.5){let best={x,z,error};for(const dx of [-step,0,step])for(const dz of [-step,0,step]){arm.rotation.x=T.MathUtils.clamp(x+dx,-2.2,.5);arm.rotation.z=T.MathUtils.clamp(z+dz,-.9,.9);this.scene.updateMatrixWorld(true);const d=palm(actor,'rightArm').distanceTo(target);if(d<best.error)best={x:arm.rotation.x,z:arm.rotation.z,error:d};}({x,z,error}=best);}
   this.supportGrip={x,z,error};arm.rotation.x=x;arm.rotation.z=z;
@@ -115,8 +116,14 @@ export class LifeScene{
   if(stage==='tuck-away'){a.parts.leftArm.rotation.x=T.MathUtils.lerp(-1,.65,ease(p));a.parts.leftArm.rotation.z=.12;this.boxLid.rotation.x=-1.6*(1-ease(p));this.giftBox.traverse(o=>{if(o instanceof T.Mesh){const m=o.material as T.MeshStandardMaterial;m.transparent=true;m.opacity=1-ease(p);}});if(p>.98)this.giftBox.visible=false;}
   if(stage==='unwrap'){
    a.parts.leftArm.rotation.x=-1; a.waist.rotation.x=Math.sin(p*Math.PI)*.12;this.updateRoots();
-   this.boxLid.rotation.x=-1.6*ease(p);if(p>.12)this.event('box','boxOpen');
-   this.bagVisible=true;this.gift.visible=true;const from=new T.Vector3(-.3,.57,-1.7),to=palm(a,'leftArm').sub(this.root.position).sub(new T.Vector3(.26,1.08,.2).applyAxisAngle(new T.Vector3(0,1,0),Math.PI/2));this.gift.position.lerpVectors(from,to,ease(Math.max(0,(p-.2)/.8)));this.gift.rotation.y=Math.PI/2;return;
+   this.boxLid.rotation.x=-1.6*ease(Math.min(1,p/.4));if(p>.12)this.event('box','boxOpen');
+   this.bagVisible=true;this.gift.visible=true;
+   const from=BAG_IN_BOX.clone().setZ(this.giftBoxZ),raised=from.clone().setY(2.4),travel=ease(T.MathUtils.clamp((p-.7)/.3,0,1));
+   // Lift upright through the open cavity before turning toward the hand.
+   this.gift.rotation.y=Math.PI/2*travel;
+   const to=palm(a,'leftArm').sub(this.root.position).sub(BAG_GRIP.clone().applyAxisAngle(new T.Vector3(0,1,0),Math.PI/2));
+   if(p<=.7)this.gift.position.lerpVectors(from,raised,ease(T.MathUtils.clamp((p-.4)/.3,0,1)));
+   else this.gift.position.lerpVectors(raised,to,travel);return;
   }
   if(stage==='curious')headPose(b,.03,-.12,.06*Math.sin(p*Math.PI));
   if(stage==='hide-turn'){turn(a,Math.PI/2-.8*Math.sin(p*Math.PI),dt);headPose(b,.03,-.12,.04);}
@@ -126,7 +133,7 @@ export class LifeScene{
   this.updateRoots();const from=palm(a,'leftArm'),to=palm(b,'rightArm');
   if(stage==='receive'){
    this.holdGift(from.clone().lerp(to,ease(p)));
-   if(p===1&&this.owner==='DJ'){this.transferGap=this.gift.localToWorld(new T.Vector3(.26,1.08,.2)).distanceTo(to);this.owner='YW';this.event('handoff','gift');}
+   if(p===1&&this.owner==='DJ'){this.transferGap=this.gift.localToWorld(BAG_GRIP.clone()).distanceTo(to);this.owner='YW';this.event('handoff','gift');}
   }else this.holdGift(this.owner==='DJ'?from:to,hidden?a.heading:stage==='show'?T.MathUtils.lerp(Math.PI/2,b.heading+Math.PI/2,ease(p/.25)):stage==='stow'?b.heading+Math.PI/2:Math.PI/2);
   if(stage==='offer'){if(!this.supportGrip)this.supportHand();const k=ease(p/.35);a.parts.rightArm.rotation.x=this.supportGrip!.x*k;a.parts.rightArm.rotation.z=T.MathUtils.lerp(-T.MathUtils.degToRad(9.782),this.supportGrip!.z,k);b.parts.rightArm.rotation.x=-1.12*ease(p);}
   if(stage==='receive'&&this.supportGrip){const k=1-ease(p/.4);a.parts.rightArm.rotation.x=this.supportGrip.x*k;a.parts.rightArm.rotation.z=T.MathUtils.lerp(-T.MathUtils.degToRad(9.782),this.supportGrip.z,k);}
@@ -144,7 +151,7 @@ export class LifeScene{
  get snapshot(){return{id:this.kind,phase:this.phase,stage:this.index,time:this.time,total:this.total,cancelled:this.cancelled,seatBlend:this.seatBlend,routeIndex:this.routeIndex,furnitureObstacles:this.movementObstacles,flowerCommitted:this.committed,bagOwner:this.owner,bagVisible:this.bagVisible,bagInstances:this.gift.parent?1:0,transferGap:this.transferGap,bagRotation:this.gift.rotation.y,boxVisible:this.giftBox.visible&&!!this.giftBox.parent,heartVisible:this.heart?.visible??false,supportGripError:this.supportGrip?.error,furnitureZ:this.furniture.position.z,anchor:this.anchor.toArray(),rootAttached:!!this.root.parent};}
  get movementObstacles(){return this.kind==='overtime'?officeObstacles({x:this.anchor.x,z:this.anchor.y},this.furniture.position.z):[];}
  obstaclesFor(actor:number){
-  if(this.kind==='gift')return this.giftBox.visible?[{a:{x:this.anchor.x-.3,z:this.anchor.y-1.7},b:{x:this.anchor.x-.3,z:this.anchor.y-1.7},radius:1.2,kind:'gift-box'}]:[];
+  if(this.kind==='gift')return this.giftBox.visible?[{a:{x:this.anchor.x+GIFT_BOX_POSITION.x,z:this.anchor.y+this.giftBoxZ},b:{x:this.anchor.x+GIFT_BOX_POSITION.x,z:this.anchor.y+this.giftBoxZ},radius:GIFT_BOX_RADIUS,kind:'gift-box'}]:[];
   if(this.kind!=='overtime')return[];
   // YW alone may cross the chair/desk envelope to reach the authored seat.
   const contact=actor===1&&(this.cancelled?this.release<2&&this.clearViaSeat:['take-seats','sit','work','stand','leave-seats'].includes(this.phase));
@@ -155,14 +162,14 @@ export class LifeScene{
  private face(dt:number){this.actors.forEach((f,i)=>{if(this.kind==='overtime'&&i===0&&this.phase==='work')return;turn(f,this.kind==='overtime'?0:this.kind==='flower'?Math.atan2(this.world.flowerPoint.x-f.x,this.world.flowerPoint.y-f.z):i===0?Math.PI/2:-Math.PI/2,dt);});}
  private seated(k:number){this.seatBlend=k;this.actors.forEach((f,i)=>{if(i===0)return;f.legPivots.forEach(p=>p.rotation.x=-Math.PI/2*k);f.heightOffset=-.23*k;f.parts.rightArm.rotation.x=-1.6*k;f.parts.leftArm.rotation.x=-1.6*k;headPose(f,.05*k);});}
  private updateRoots(){for(const f of this.actors){f.root.position.set(f.x,2.52+f.heightOffset,f.z);f.root.rotation.y=f.heading;}this.scene.updateMatrixWorld(true);}
- private holdGift(position:T.Vector3,yaw=Math.PI/2){const anchor=new T.Vector3(.26,1.08,.2).applyAxisAngle(new T.Vector3(0,1,0),yaw);this.gift.position.copy(position).sub(this.root.position).sub(anchor);this.gift.rotation.set(0,yaw,0);}
+ private holdGift(position:T.Vector3,yaw=Math.PI/2){const anchor=BAG_GRIP.clone().applyAxisAngle(new T.Vector3(0,1,0),yaw);this.gift.position.copy(position).sub(this.root.position).sub(anchor);this.gift.rotation.set(0,yaw,0);}
  cancel(){
   if(this.done||this.cancelled)return;this.cancelGiftPosition.copy(this.gift.position);this.cancelled=true;if(this.heart)this.heart.visible=false;this.release=0;this.time=0;this.exitFrom=this.furniture.position.z;this.clearViaSeat=this.kind==='overtime'&&['take-seats','sit','work','stand','leave-seats'].includes(this.stages[this.index]?.name);
   this.saved=this.actors.map(f=>({height:f.heightOffset,legs:f.legPivots.map(p=>p.rotation.x),arms:[f.parts.rightArm.rotation.x,f.parts.leftArm.rotation.x],waist:f.waist.rotation.x}));
  }
  private cancelUpdate(dt:number){
   this.time+=dt;
-  if(this.release===0){const k=1-ease(this.time/.8);this.actors.forEach((f,i)=>{const s=this.saved![i];f.heightOffset=s.height*k;f.legPivots.forEach((p,j)=>p.rotation.x=s.legs[j]*k);f.parts.rightArm.rotation.x=s.arms[0]*k;f.parts.leftArm.rotation.x=s.arms[1]*k;f.waist.rotation.x=s.waist*k;});this.updateRoots();if(this.kind==='gift'&&this.bagVisible){const hand=palm(this.actors[this.owner==='DJ'?0:1],this.owner==='DJ'?'leftArm':'rightArm').sub(this.root.position).sub(new T.Vector3(.26,1.08,.2).applyAxisAngle(new T.Vector3(0,1,0),this.gift.rotation.y));this.gift.position.lerpVectors(this.cancelGiftPosition,hand,ease(this.time/.6));if(this.time>.6){this.gift.visible=false;this.bagVisible=false;}}if(this.time>=.8){this.seed.visible=false;this.release=1;this.time=0;}}
+  if(this.release===0){const k=1-ease(this.time/.8);this.actors.forEach((f,i)=>{const s=this.saved![i];f.heightOffset=s.height*k;f.legPivots.forEach((p,j)=>p.rotation.x=s.legs[j]*k);f.parts.rightArm.rotation.x=s.arms[0]*k;f.parts.leftArm.rotation.x=s.arms[1]*k;f.waist.rotation.x=s.waist*k;});this.updateRoots();if(this.kind==='gift'&&this.bagVisible){const hand=palm(this.actors[this.owner==='DJ'?0:1],this.owner==='DJ'?'leftArm':'rightArm').sub(this.root.position).sub(BAG_GRIP.clone().applyAxisAngle(new T.Vector3(0,1,0),this.gift.rotation.y));this.gift.position.lerpVectors(this.cancelGiftPosition,hand,ease(this.time/.6));if(this.time>.6){this.gift.visible=false;this.bagVisible=false;}}if(this.time>=.8){this.seed.visible=false;this.release=1;this.time=0;}}
   else if(this.release===1){if(this.kind!=='overtime'||Math.abs(this.exitFrom-this.entryZ)<.01){this.release=2;this.time=0;}else if(this.clearViaSeat){if(this.positions([[-3.8,-3.6],[0,-3.6]],dt))this.clearViaSeat=false;}else if(this.positions([[-3.8,-3.6],[3.8,-3.6]],dt)){this.release=2;this.time=0;}}
   else{if(this.kind==='overtime')this.furniture.position.z=T.MathUtils.lerp(this.exitFrom,this.entryZ,ease(this.time/1.8));if(this.kind!=='overtime'||this.time>=1.8){this.dispose();return true;}}
   return false;

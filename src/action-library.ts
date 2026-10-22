@@ -12,7 +12,7 @@ const pair=(spacing:number,duration:number,facing:'partner'|'together'='partner'
 export const ACTIONS:Record<ActionId,ActionSpec>={
  overtime:{label:['加一会儿班','A little overtime'],copy:['陪你加一会儿班。','A little overtime, together.'],participants:[0,1],phases:[],exit:'stay'},
  flower:{label:['种一朵花','A flower for us'],copy:['种一朵花，送给我们。','A little flower, for us.'],participants:[0,1],phases:[],exit:'stay'},
- gift:{label:['送你一只包','A bag for you'],copy:['DJ 给 YW 的一份小小偏爱。','A little surprise, from DJ to YW.'],participants:[0,1],phases:[],exit:'stay'},
+ gift:{label:['送你一只包','A bag for you'],copy:['DJ 送给 YW 的爱马仕，是一份小小偏爱。','A Hermès gift from DJ to YW, with love.'],participants:[0,1],phases:[],exit:'stay'},
  wave:{label:['打个招呼','Say hello'],copy:['嘿，我在这里。','Hey, here I am.'],participants:[0,1],cue:'wave',phases:[{name:'turn',duration:.4,facing:'viewer'},{name:'gesture',duration:3.2,facing:'viewer'}],exit:'stay'},
  hug:{label:['抱抱','A hug'],copy:['世界那么大，还好有你。','A big world. My favourite place is with you.'],participants:[0,1],cue:'hug',phases:pair(1.2,2.8),exit:'separate'},
  dance:{label:['一起跳舞','A little dance'],copy:['和你，平常的一天也值得庆祝。','An ordinary day is worth a dance with you.'],participants:[0,1],cue:'dance',phases:[{name:'gesture',duration:5.5}],exit:'stay'},

@@ -4,7 +4,7 @@ import * as T from 'three';
 import {LittleLifeWorld,LifeScene,FLOWER_STYLES} from '../src/life-scenes';
 import {makeGiftBag,makeGiftBox} from '../src/gift-model';
 const geometries=new Map<string,T.BufferGeometry[]>();
-for(const id of ['3032','3005','4079','3023','3068b','99249','24866']){
+for(const id of ['93091','3021','3010','3069b','3032','3005','4079','3023','3068b','99249','24866']){
  const data=await(await fetch('/models/'+id+'.json')).json();
  geometries.set(id,Object.values(data).map((vertices:any)=>{const geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(vertices.map((v:number,i:number)=>v*.035*(i%3===0?1:-1)),3));geo.computeVertexNormals();return geo;}));
 }
@@ -14,7 +14,7 @@ scene.add(new T.HemisphereLight('#fffaf0','#d8d4cb',2.3));const sun=new T.Direct
 const camera=new T.OrthographicCamera(-3,3,3,-3,.01,200),catalog=new Map<string,T.Group>();
 const world=new LittleLifeWorld(scene,make),garden=new T.Group();
 for(let i=0;i<5;i++){world.prepareFlower(()=>0);world.plant();const flower=world.flower;flower.position.set(0,0,0);catalog.set('flower-'+FLOWER_STYLES[i].name,flower);flower.removeFromParent();const clone=flower.clone(true);clone.position.set((i-2)*1.8,0,0);garden.add(clone);}
-catalog.set('flower-garden',garden);catalog.set('gift-bag',makeGiftBag(make));const box=makeGiftBox();box.root.position.set(0,0,0);catalog.set('gift-box',box.root);
+catalog.set('flower-garden',garden);catalog.set('gift-bag',makeGiftBag(make));const box=makeGiftBox(make);box.root.position.set(0,0,0);catalog.set('gift-box',box.root);
 new LifeScene('overtime',[],scene,world,()=>0,()=>{},()=>{},new T.Vector2(),0);const office=scene.getObjectByName('little-life-scene') as T.Group;office.removeFromParent();catalog.set('office-desk',office);
 let current:T.Group|undefined;
 function show(name:string){if(current)scene.remove(current);current=catalog.get(name);if(!current)throw Error(name);scene.add(current);scene.updateMatrixWorld(true);const bounds=new T.Box3().setFromObject(current),center=bounds.getCenter(new T.Vector3()),size=bounds.getSize(new T.Vector3());const direction=new T.Vector3(.65,.45,1).normalize();if(name==='office-desk')direction.set(.65,.7,-1).normalize();camera.position.copy(center).addScaledVector(direction,20);camera.lookAt(center);camera.updateMatrixWorld(true);

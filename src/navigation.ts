@@ -1,7 +1,8 @@
+import {GIFT_BOX_LAYOUT,GIFT_BOX_Z_OPTIONS,giftUnwrapPoint} from './gift-layout';
 /** Swept 2D capsules: feet/body clearance for a rigid toy, not a ragdoll solver. */
 export type Point={x:number;z:number};
 export type Obstacle={a:Point;b:Point;radius:number;owner?:number;kind?:string};
-export type Bounds={wanderX:number;wanderZ:number};
+export type Bounds={wanderX:number;wanderZ:number;width?:number;depth?:number};
 export const distance=(a:Point,b:Point)=>Math.hypot(a.x-b.x,a.z-b.z);
 export function closest(p:Point,a:Point,b:Point):Point{const x=b.x-a.x,z=b.z-a.z,t=Math.max(0,Math.min(1,((p.x-a.x)*x+(p.z-a.z)*z)/(x*x+z*z||1)));return{x:a.x+x*t,z:a.z+z*t};}
 const cross=(a:Point,b:Point,c:Point)=>(b.x-a.x)*(c.z-a.z)-(b.z-a.z)*(c.x-a.x);
@@ -45,7 +46,7 @@ export function planPath(start:Point,goal:Point,obstacles:readonly Obstacle[],bo
  if(!Number.isFinite(costs[1]))return[];
  const path:Point[]=[];for(let i=1;i>0;i=prev[i]){path.unshift(nodes[i]);if(prev[i]<0)return[];}return path;
 }
-export type Clearing={center:Point;axis:Point;points:Point[];entryZ:number;compact?:boolean};
+export type Clearing={center:Point;axis:Point;points:Point[];entryZ:number;compact?:boolean;giftBoxZ?:number};
 function intersectsBox(o:Obstacle,c:Point,left:number,right:number,back:number,front:number){
  const corners=[{x:c.x+left,z:c.z+back},{x:c.x+right,z:c.z+back},{x:c.x+right,z:c.z+front},{x:c.x+left,z:c.z+front}];
  if([o.a,o.b].some(p=>p.x>=corners[0].x&&p.x<=corners[1].x&&p.z>=corners[0].z&&p.z<=corners[2].z))return true;
@@ -54,11 +55,12 @@ function intersectsBox(o:Obstacle,c:Point,left:number,right:number,back:number,f
 export function findClearing(actors:readonly Point[],obstacles:readonly Obstacle[],bounds:Bounds,kind:'basic'|'overtime'|'flower'|'gift'='basic',fixedFlower?:Point,viewerAxis:Point={x:1,z:0}):Clearing|undefined{
  const mid={x:(actors[0].x+actors[1].x)/2,z:(actors[0].z+actors[1].z)/2},candidates:Point[]=[];
  if(fixedFlower)candidates.push(fixedFlower);else{
-  candidates.push(mid);for(let r=.7;r<=9;r+=.7)for(let i=0;i<24;i++){const a=i*Math.PI/12;candidates.push({x:mid.x+Math.cos(a)*r,z:mid.z+Math.sin(a)*r});}
+  const increment=kind==='gift'?.35:.7;
+  candidates.push(mid);for(let r=increment;r<=9;r+=increment)for(let i=0;i<24;i++){const a=i*Math.PI/12;candidates.push({x:mid.x+Math.cos(a)*r,z:mid.z+Math.sin(a)*r});}
  }
  let best:Clearing|undefined,score=Infinity;
  for(const c of candidates){
-  let entryZ=-13,compact=false;
+  let entryZ=-13,compact=false,giftBoxZ:number|undefined;
   if(kind==='overtime'){
    if(c.x-4.6<-bounds.wanderX||c.x+4.6>bounds.wanderX||c.z-4.4<-bounds.wanderZ)continue;
    if(obstacles.some(o=>intersectsBox(o,c,-2.5,2.5,-2.8,1.8)))continue;
@@ -72,13 +74,23 @@ export function findClearing(actors:readonly Point[],obstacles:readonly Obstacle
    const radius=3.4;
    if(Math.abs(c.x)+radius>bounds.wanderX||Math.abs(c.z)+radius>bounds.wanderZ||obstacles.some(o=>clearance(c,o)<radius+.2))continue;
   }
+  if(kind==='gift'){
+   // Reserve the box separately. Either side of the couple can use the full
+   // table, while all people remain inside the original walking boundary.
+   const radius=GIFT_BOX_LAYOUT.radius,surfaceX=bounds.width===undefined?bounds.wanderX:bounds.width/2,surfaceZ=bounds.depth===undefined?bounds.wanderZ:bounds.depth/2;
+   giftBoxZ=GIFT_BOX_Z_OPTIONS.find(z=>{
+    const box={x:c.x+GIFT_BOX_LAYOUT.x,z:c.z+z},unwrap=giftUnwrapPoint(z),stand={x:c.x+unwrap.x,z:c.z+unwrap.z};
+    return Math.abs(box.x)+radius<=surfaceX&&Math.abs(box.z)+radius<=surfaceZ&&obstacles.every(o=>clearance(box,o)>=radius+.2)&&Math.abs(stand.x)+.72<=bounds.wanderX&&Math.abs(stand.z)+.72<=bounds.wanderZ&&obstacles.every(o=>clearance(stand,o)>=.8);
+   });
+   if(giftBoxZ===undefined)continue;
+  }
   const base=Math.atan2(actors[1].z-actors[0].z,actors[1].x-actors[0].x);
   for(let i=0;i<(fixedFlower?48:4);i++){
    const angle=fixedFlower?(i%16)*Math.PI/8:base+i*Math.PI/4,axis={x:Math.cos(angle),z:Math.sin(angle)};
    const points=kind==='gift'?[-1,1].map(s=>({x:c.x+s*1.6,z:c.z+1})):fixedFlower?[-1,1].map(s=>({x:c.x+s*1.1*axis.x-(1.9+Math.floor(i/16)*.45)*axis.z,z:c.z+s*1.1*axis.z+(1.9+Math.floor(i/16)*.45)*axis.x})):[-1,1].map(s=>({x:c.x+s*1.6*axis.x,z:c.z+s*1.6*axis.z}));
    if(points.some(p=>Math.abs(p.x)>bounds.wanderX||Math.abs(p.z)>bounds.wanderZ||obstacles.some(o=>clearance(p,o)<.8)))continue;
    const travel=distance(actors[0],points[0])+distance(actors[1],points[1]),cost=travel+(compact?8:0)+distance(mid,c)*.3+i*.025+(1-Math.abs((axis.x*viewerAxis.x+axis.z*viewerAxis.z)/(Math.hypot(viewerAxis.x,viewerAxis.z)||1)))*1.2;
-   if(cost<score){score=cost;best={center:{...c},axis,points,entryZ,compact};}
+   if(cost<score){score=cost;best={center:{...c},axis,points,entryZ,compact,giftBoxZ};}
   }
  }return best;
 }
