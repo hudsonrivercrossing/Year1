@@ -11,11 +11,11 @@
 **[走进我们的小世界 · Enter our little world ↗](https://hudsonrivercrossing.github.io/Year1/)**
 
 <p align="center">
-  <img src="readme-assets/dance-front.gif" alt="DJ 和 YW 在积木工作台上一起跳舞" width="640">
+  <img src="readme-assets/kiss.gif" alt="亲亲 · A little kiss" width="640">
 </p>
 <p align="center">
-  <img src="readme-assets/dance-angle.gif" alt="斜侧视角下，两个人仔轻轻转圈跳舞" width="315">
-  <img src="readme-assets/dance-close.gif" alt="近距离看 DJ 和 YW 的小小舞步" width="315">
+  <img src="readme-assets/hug.gif" alt="抱抱 · A warm hug" width="315">
+  <img src="readme-assets/dance-front.gif" alt="跳舞 · A little dance" width="315">
 </p>
 
 ## 从一份礼物开始
@@ -73,11 +73,3 @@
     <td align="center" colspan="2"><img src="readme-assets/ice-cream.png" alt="YW 左手的橙色一体甜筒 33120" width="150"><br>YW 左手 · 橙色甜筒<br><code>33120</code></td>
   </tr>
 </table>
-
-图鉴展示当前小世界里的模型。上衣印花为照片参考重绘，YW 长发为原创近似；照片不足以唯一确认 YW 的头部背面版本。
-
----
-
-Standard part models: [LDraw Parts Library](https://www.ldraw.org/). [Original authors & licenses](public/ldraw-source/) · [Music](public/audio/README.md).
-
-An independent anniversary gift, not affiliated with or endorsed by the LEGO Group.
