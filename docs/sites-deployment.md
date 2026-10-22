@@ -5,11 +5,11 @@
 - 发布日期：2026-10-21。
 - 发布状态：Sites 原生操作返回 `succeeded`。
 - 项目 ID：`appgprj_6ad83efe21fc8191b7860f21faf541e8`。
-- 部署 ID：`appgdep_6ad95d4b35508191b4d524c7b72226a9`。
-- 版本 ID：`appgprj_6ad83efe21fc8191b7860f21faf541e8~appgver_f3d74c685b1081919ad69cda4ae4621d`。
-- 对应本地功能提交：`3014f08`（紧凑毛玻璃菜单、人物避让投影、新音乐 Piece by Piece）；`v1.0.0` 标签保持不变。
-- Sites 源码提交：`f54c21d950a9a3522354a3245818026b4f4793f7`。
-- 本次增量：手机动作卡片约 213px、半透明毛玻璃、保持人物可见；背景音乐改为干净弹跳的 Piece by Piece，保留 0.14 音量与独立音效。
+- 部署 ID：`appgdep_6ad9626708d88191b0470f118bfb9d24`。
+- 版本 ID：`appgprj_6ad83efe21fc8191b7860f21faf541e8~appgver_ddeb4c9f3b5881919972ca8a6ed3985d`。
+- 对应本地功能提交：`dc879f3`（紧凑毛玻璃菜单、新音乐 Piece by Piece、音效和自动拼装控件精简）；`v1.0.0` 标签保持不变。
+- Sites 源码提交：`8298b2eeaf39bd7ad242e3a42ab5e8c25c7c9d6e`。
+- 本次增量：手机动作卡片约 213px、半透明毛玻璃、保持人物可见；背景音乐改为干净弹跳的 Piece by Piece，保留 0.14 音量；交互音效始终开启，移除其开关；「我太懒了」只保留自动拼装。
 - 本轮内容：手机工作台布局、照片部件与配色、六个新动作、两条新组合、四件手持物的放落/返回拾取；[验收记录](mobile-actions-validation.md)。
 - 发布构建与本地生产构建的 147 个文件逐一 SHA256 一致。
 
