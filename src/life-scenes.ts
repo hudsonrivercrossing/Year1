@@ -18,21 +18,44 @@ function clear(root:T.Group){root.removeFromParent();root.traverse(o=>{if(o inst
 function originalBox(x:number,y:number,z:number,color:string){const m=box(x,y,z,color);m.userData.originalGeometry=true;return m;}
 
 /** Permanent objects belong to the world, transient props to one scene. */
+export const FLOWER_STYLES=[
+ {name:'rose',color:'#dc8e91',petals:1},
+ {name:'sunshine',color:'#e8bd59',petals:2},
+ {name:'lavender',color:'#ad9ac5',petals:3},
+ {name:'ivory',color:'#f4e9cb',petals:4},
+ {name:'cornflower',color:'#8ebbc9',petals:5},
+] as const;
+type Flower={id:number;root:T.Group;point:T.Vector2;radius:number;style:number};
 export class LittleLifeWorld{
- readonly flower=new T.Group();planted=false;
- readonly flowerPoint=new T.Vector2(-5,-3);
- constructor(private scene:T.Scene,readonly make:Maker){
-  this.flower.name='anniversary-flower';this.flower.visible=false;this.flower.position.set(-5,.04,-3);
-  const base=make('3068b','#a6b48b');base.position.y=.28;
-  const stem=make('99249','#60865b');stem.position.y=.28;
-  const petals=make('24866','#dc8e91');petals.name='flower-petals';petals.position.set(0,2.03,0);
-  this.flower.add(base,stem,petals);scene.add(this.flower);
+ readonly flowers:Flower[]=[];private selected:Flower;private lastDance=-1;
+ constructor(private scene:T.Scene,readonly make:Maker){this.selected=this.create(0);}
+ private create(style:number):Flower{
+  const root=new T.Group(),spec=FLOWER_STYLES[style];root.name='anniversary-flower';root.visible=false;root.position.set(-5,.04,-3);
+  const base=this.make('3068b','#a6b48b');base.position.y=.28;
+  const stem=this.make('99249','#60865b');stem.position.y=.28;root.add(base,stem);
+  // Five rigid assemblies of standard flower plates; never stretch a source mesh.
+  for(let n=0;n<spec.petals;n++){
+   const petals=this.make('24866',spec.color);petals.name='flower-petals';
+   const r=spec.petals<=2?0:.24,angle=n*Math.PI*2/spec.petals;
+   petals.position.set(Math.cos(angle)*r,2.03+n*.065,Math.sin(angle)*r);petals.rotation.y=n*.7;root.add(petals);
+  }
+  this.scene.add(root);return{id:style,root,point:new T.Vector2(-5,-3),radius:1.05,style};
+ }
+ get flower(){return this.selected.root;}
+ get flowerPoint(){return this.selected.point;}
+ get planted(){return this.flowers.includes(this.selected);}
+ get full(){return this.flowers.length>=5;}
+ prepareFlower(random=Math.random){
+  if(this.full){const options=this.flowers.filter(f=>f.id!==this.lastDance);this.selected=options[Math.floor(random()*options.length)]??this.flowers[0];this.lastDance=this.selected.id;}
+  else if(this.planted)this.selected=this.create(this.flowers.length);
  }
  setFlowerPoint(x:number,z:number){if(this.planted)return;this.flowerPoint.set(x,z);this.flower.position.set(x,.04,z);}
- plant(){this.planted=true;this.flower.visible=true;this.flower.scale.setScalar(1);}
- reset(){this.planted=false;this.flower.visible=false;this.flower.scale.setScalar(1);}
- get obstacle(){return this.planted?{x:this.flowerPoint.x,z:this.flowerPoint.y,radius:1}:undefined;}
- get snapshot(){return{flowers:Number(this.planted),position:this.flower.position.toArray()};}
+ plant(){if(!this.planted&&!this.full)this.flowers.push(this.selected);this.flower.visible=true;}
+ reset(){const roots=new Set([...this.flowers.map(f=>f.root),this.flower]);for(const root of roots)clear(root);this.flowers.length=0;this.lastDance=-1;this.selected=this.create(0);}
+ get obstacles(){return this.flowers.map(f=>({a:{x:f.point.x,z:f.point.y},b:{x:f.point.x,z:f.point.y},radius:f.radius,kind:'flower',owner:100+f.id}));}
+ get obstacle(){return this.planted?{x:this.flowerPoint.x,z:this.flowerPoint.y,radius:this.selected.radius}:undefined;}
+ get selectedId(){return this.selected.id;}
+ get snapshot(){return{flowers:this.flowers.length,position:this.flower.position.toArray(),selected:this.selected.id,full:this.full,items:this.flowers.map(f=>({id:f.id,position:f.root.position.toArray(),style:FLOWER_STYLES[f.style].name,color:FLOWER_STYLES[f.style].color,radius:f.radius}))};}
 }
 
 type Stage={name:string;duration?:number;points?:[number,number][]};
@@ -49,8 +72,8 @@ export class LifeScene{
   if(kind==='overtime'){
    this.buildOffice();this.stages=[{name:'make-room',points:[[-3,-3],[3,-3]]},{name:'enter',duration:2},{name:'beside-seats',points:[[-3,-1.65],[3,-1.65]]},{name:'take-seats',points:[[-1.35,-1.65],[1.35,-1.65]]},{name:'sit',duration:1},{name:'work',duration:5.5},{name:'stand',duration:1},{name:'leave-seats',points:[[-3,-1.65],[3,-1.65]]},{name:'clear',points:[[-3,-3],[3,-3]]},{name:'exit',duration:2}];
   }else if(kind==='flower'){
-   this.seed.add(world.make('24866','#dc8e91'));this.root.add(this.seed);this.seed.visible=!world.planted;
-   this.stages=[{name:'approach',points:flowerStands?flowerStands.map(p=>[p.x-this.anchor.x,p.z-this.anchor.y]):[[-1.1,1.6],[1.1,1.6]]},{name:'reveal',duration:1.2},{name:world.planted?'tend':'plant',duration:2.4},{name:'admire',duration:3},{name:'release',duration:.8}];
+   this.seed.add(world.make('24866',FLOWER_STYLES[world.selectedId].color));this.root.add(this.seed);this.seed.visible=!world.planted;
+   this.stages=[{name:'approach',points:flowerStands?flowerStands.map(p=>[p.x-this.anchor.x,p.z-this.anchor.y]):[[-1.1,1.6],[1.1,1.6]]},{name:'reveal',duration:1.2},{name:world.planted?'flower-dance':'plant',duration:world.planted?5.5:2.4},{name:'admire',duration:3},{name:'release',duration:.8}];
   }else{
    this.buildGift();this.stages=[{name:'approach',points:[[-.95,1],[.95,1]]},{name:'reveal',duration:1.4},{name:'offer',duration:1.5},{name:'receive',duration:1.2},{name:'show',duration:2.8},{name:'stow',duration:1.2},{name:'release',duration:.65}];
   }
@@ -119,6 +142,7 @@ export class LifeScene{
     this.updateRoots();const from=palm(a,'leftArm'),to=new T.Vector3(this.world.flowerPoint.x,1.9,this.world.flowerPoint.y);this.seed.position.lerpVectors(from,to,ease(Math.min(1,p*1.6))).sub(this.root.position);
     if(p>.62&&!this.committed){this.world.plant();this.committed=true;this.seed.visible=false;this.sound('plant');}
    }
+   if(s.name==='flower-dance'){this.actors.forEach((f,i)=>{turn(f,Math.atan2(this.world.flowerPoint.x-f.x,this.world.flowerPoint.y-f.z)+Math.sin(this.time*2+i)*.25,dt);f.legPivots.forEach((leg,j)=>leg.rotation.x=Math.sin(this.time*7+i+j*Math.PI)*.18);f.parts.leftArm.rotation.x=-.5+Math.sin(this.time*4+i)*.2;f.parts.rightArm.rotation.x=-.5-Math.sin(this.time*4+i)*.2;headPose(f,.03,Math.sin(this.time*3+i)*.12);});if(this.tick===0){this.tick=1;this.sound('dance');}}
    if(s.name==='admire'){this.actors.forEach(f=>turn(f,0,dt));headPose(a,.06,-.12);headPose(b,.06,.12);}
   }else{
    const[a,b]=this.actors;const k=s.name==='reveal'?ease(p):s.name==='stow'?1-ease(p):s.name==='release'?0:1;

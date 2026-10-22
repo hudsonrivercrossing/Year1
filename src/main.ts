@@ -13,6 +13,7 @@ import {loadShirtPrints,shirtPrint} from './shirt-prints';
 import {ActionScene,headPose} from './affection';
 import {ACTIONS,SEQUENCES,LIBRARY_GROUPS,AUTO_ACTIONS,chooseFresh,type ActionId,type SequenceId} from './action-library';
 import {LifeScene,LittleLifeWorld,isLifeAction,LIFE_ACTIONS} from './life-scenes';
+import {planFlower} from './garden';
 import {Navigator,findClearing,safePoint,segmentClear,distance as groundDistance,clearance as obstacleClearance,type Obstacle,type Clearing} from './navigation';
 import {HandProps} from './hand-props';
 import {waistBand} from './waist-band';
@@ -115,7 +116,7 @@ function activityStatus(){
  if(staging){status(t('先找块空地，靠近你。','A little space, just for us.'));return;}
  if(cancelling){status(t('歇一会，再捡起小东西。','A little pause, then our little things.'));return;}
  if(activity==='recover'){status(t('先回去，把小东西捡起来。','Back for our little things.'));return;}
- status(activity==='wander'?'':t(...ACTIONS[activity].copy));
+ status(activity==='wander'?'':activity==='flower'&&lifeWorld?.full?t('陪花跳支舞，也陪你。','A little dance, with our flowers and you.'):t(...ACTIONS[activity].copy));
 }
 function fitView(){autoFraming=phoneView();if(mode==='build'||mode==='ready')setBuildView();else{const view=playView();camera.position.copy(view.position);controls.target.copy(view.target);controls.update();}}
 const fitButton=(build=false)=>`<button id="fit" class="mobile-only ${build?'build-tool':'fit-control'}" aria-label="${t('重新取景','Frame the workbench')}" title="${t('重新取景','Frame the workbench')}">${build?'<span class="tool-disc">':''}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4H4v4m12-4h4v4M4 16v4h4m12-4v4h-4M9 12h6m-3-3v6"/></svg>${build?`</span><span class="tool-caption">${t('取景','Frame')}</span>`:''}</button>`;
@@ -189,7 +190,7 @@ function selectLibraryTab(tab:typeof libraryTab,focus=false){
  for(const id of ['affection','together','stories','life'] as const){const selected=id===tab,button=$('library-tab-'+id);button.setAttribute('aria-selected',String(selected));button.tabIndex=selected?0:-1;$('library-panel-'+id).hidden=!selected;if(selected&&focus)button.focus();}
 }
 function playTools(){
- const actions=(ids:readonly Action[])=>ids.map(id=>`<button id="${id==='wave'||id==='dance'?'library-'+id:id}" data-action="${id}">${t(...ACTIONS[id].label)}</button>`).join('');
+ const actions=(ids:readonly Action[])=>ids.map(id=>`<button id="${id==='wave'||id==='dance'?'library-'+id:id}" data-action="${id}">${id==='flower'&&lifeWorld?.full?t('陪花跳支舞','Dance with our flowers'):t(...ACTIONS[id].label)}</button>`).join('');
  const recipes=Object.entries(SEQUENCES).map(([id,recipe])=>`<button id="${id}" data-sequence="${id}">${t(...recipe.label)}</button>`).join('');
  const tabs=[['affection',t('心动','Affection')],['together',t('陪伴','Together')],['stories',t('组合','Stories')],['life',t('生活','Life')]] as const;
  const panels=tabs.map(([id])=>`<section id="library-panel-${id}" class="library-group ${id==='stories'?'recipes':''}" role="tabpanel" aria-labelledby="library-tab-${id}" ${libraryTab===id?'':'hidden'}><div>${id==='affection'?actions(LIBRARY_GROUPS[0].actions):id==='together'?actions(['wave','dance',...LIBRARY_GROUPS[1].actions]):id==='life'?actions(LIFE_ACTIONS):recipes+`<button id="surprise">${t('随心来一段','Surprise us')}</button>`}</div></section>`).join('');
@@ -206,6 +207,7 @@ function playTools(){
  $('reset').onclick=reset;$('rebuild-menu').onclick=reset;$('fit').onclick=fitView;renderCopy();actionControls();
 }
 function actionControls(){
+ const flowerButton=$('tools').querySelector<HTMLButtonElement>('[data-action=flower]');if(flowerButton)flowerButton.textContent=lifeWorld?.full?t('陪花跳支舞','Dance with our flowers'):t(...ACTIONS.flower.label);
  const busy=activity!=='wander';
  for(const button of Array.from($('tools').querySelectorAll<HTMLButtonElement>('[data-action],[data-sequence],#wave,#hug,#dance,#surprise'))){button.disabled=busy;const id=button.dataset.action??button.dataset.sequence??button.id;button.setAttribute('aria-pressed',String(sequence?id===sequence:id===activity));}
  if($('stop')){$('stop').hidden=!busy;$<HTMLButtonElement>('stop').disabled=activity==='recover'||cancelling;$('stop').textContent=activity==='recover'?t('捡起小东西','Picking up…'):t('先歇一会','A little pause');}
@@ -213,7 +215,7 @@ function actionControls(){
 }
 function startActivity(a:Action){if(mode!=='play'||activity!=='wander')return;sequence=undefined;sweet=false;props?.drop();dropTime=elapsed;beginActivity(a);}
 function startSequence(id:SequenceId){if(mode!=='play'||activity!=='wander')return;sequence=id;sweet=id==='sweet';recentSequences.push(id);if(recentSequences.length>6)recentSequences.shift();const steps=[...SEQUENCES[id].steps];queue=steps.slice(1);props?.drop();dropTime=elapsed;beginActivity(steps[0]);}
-function beginActivity(a:Action){activity=a;activityTime=0;cancelling=false;interactionArena=undefined;staging={action:a,time:0};navigator.reset();activityStatus();actionControls();}
+function beginActivity(a:Action){activity=a;activityTime=0;cancelling=false;interactionArena=undefined;staging={action:a,time:0};if(a==='flower')lifeWorld!.prepareFlower();navigator.reset();activityStatus();actionControls();}
 function runActivity(a:Action){
  staging=undefined;navigator.reset();
  activity=a;activityTime=0;cancelling=false;recentActions.push(a);if(recentActions.length>8)recentActions.shift();
@@ -232,8 +234,7 @@ function finishActivity(){
 function resumeWander(){pickupEscapes=undefined;recoveryStarted=false;activity='wander';activityTime=0;nextAuto=45+Math.random()*25;for(const f of figures){pose(f,0,elapsed);f.pause=.4+Math.random()*2;f.look=f.heading;f.decision=.5+Math.random()*3;f.target.set(f.x,f.z);}activityStatus();actionControls();}
 function pose(f:Figure,walk:number,t:number){f.heightOffset=0;f.waist.rotation.set(0,0,0);f.legPivots[0].rotation.x=Math.sin(t*8)*.42*walk;f.legPivots[1].rotation.x=-Math.sin(t*8)*.42*walk;f.parts.rightArm.rotation.set(-Math.sin(t*8)*.3*walk,0,-T.MathUtils.degToRad(9.782));f.parts.leftArm.rotation.set(Math.sin(t*8)*.3*walk,0,T.MathUtils.degToRad(9.782));headPose(f,0,Math.sin(t*.9)*.09);f.root.rotation.z=0;}
 function groundObstacles(owner?:number):Obstacle[]{
- const flower=lifeWorld?.obstacle;
- return [...(flower?[{a:{x:flower.x,z:flower.z},b:{x:flower.x,z:flower.z},radius:flower.radius,kind:'flower'}]:[]),...(props?.obstacles??[]).filter(o=>owner===undefined||o.owner!==owner)];
+ return [...(lifeWorld?.obstacles??[]),...(props?.obstacles??[]).filter(o=>owner===undefined||o.owner!==owner)];
 }
 function movementObstacles(i:number){
  const all=groundObstacles(activity==='recover'?i:undefined),f=figures[i];
@@ -269,11 +270,13 @@ function updateStaging(dt:number){
  if(!s.escape)s.escape=figures.map(f=>new Set((props?.obstacles??[]).filter(o=>obstacleClearance(f,o)<1.05).map(o=>o.owner+'-'+o.kind)));
  if(!s.plan){
   const fixed=s.action==='flower'&&lifeWorld?.planted?{x:lifeWorld.flowerPoint.x,z:lifeWorld.flowerPoint.y}:undefined;
-  const obstacles=groundObstacles().filter(o=>!fixed||o.kind!=='flower');
-  s.plan=findClearing(figures,obstacles,WORLD,isLifeAction(s.action)?s.action:'basic',fixed,{x:camera.position.z-controls.target.z,z:-(camera.position.x-controls.target.x)});
-  if(!s.plan)return;interactionArena=s.plan;
+  const obstacles=groundObstacles().filter(o=>!fixed||o.kind!=='flower'||o.owner!==100+lifeWorld!.selectedId);
+  const axis={x:camera.position.z-controls.target.z,z:-(camera.position.x-controls.target.x)};
+  s.plan=s.action==='flower'&&!fixed?planFlower(figures,obstacles,WORLD,axis):findClearing(figures,obstacles,WORLD,isLifeAction(s.action)?s.action:'basic',fixed,axis);
+  if(!s.plan){if(s.time>5){staging=undefined;finishActivity();status(t('这里有点挤，先歇一会。','A little crowded here. Let’s pause.'));}return;}interactionArena=s.plan;
   if(s.action==='flower'&&!lifeWorld!.planted)lifeWorld!.setFlowerPoint(s.plan.center.x,s.plan.center.z);
  }
+ if(s.time>35){staging=undefined;finishActivity();return;}
  let arrived=true;
  figures.forEach((f,i)=>{const p=s.plan!.points[i];if(Math.hypot(f.x-p.x,f.z-p.z)>.04){arrived=false;moveTo(f,p.x,p.z,dt,2);pose(f,.85,elapsed*1.5);}});
  if(arrived)runActivity(s.action);

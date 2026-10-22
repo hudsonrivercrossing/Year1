@@ -22,6 +22,17 @@ for(const kind of LIFE_ACTIONS){
 }
 // Repeated planting reuses the one permanent object.
 {const f=fixture();f.world.plant();const flower=f.world.flower;for(let repeat=0;repeat<3;repeat++){const a=new LifeScene('flower',f.actors,f.scene,f.world,f.move,f.walk,()=>{});for(let n=0;n<9000;n++){f.actors.forEach(f.walk);if(a.update(1/60))break;}assert.equal(f.world.flower,flower);assert.equal(f.scene.children.filter(o=>o.name==='anniversary-flower').length,1);}}
+// Five committed flowers survive cancellation; an unplanted seed never commits.
+{const f=fixture();for(let i=0;i<5;i++){
+ f.world.prepareFlower(()=>.2);f.world.setFlowerPoint(-8+i*4,4);
+ let a=new LifeScene('flower',f.actors,f.scene,f.world,f.move,f.walk,()=>{});
+ a.cancel();for(let n=0;n<300;n++){f.actors.forEach(f.walk);if(a.update(1/60))break;}
+ assert.equal(f.world.snapshot.flowers,i,'Cancelled seed committed');
+ a=new LifeScene('flower',f.actors,f.scene,f.world,f.move,f.walk,()=>{});
+ for(let n=0;n<9000;n++){f.actors.forEach(f.walk);a.update(1/60);f.sync();if(a.snapshot.flowerCommitted){a.cancel();break;}}
+ for(let n=0;n<300;n++){f.actors.forEach(f.walk);if(a.update(1/60))break;}
+ assert.equal(f.world.snapshot.flowers,i+1,'Committed flower lost');
+}assert.equal(f.world.obstacles.length,5);f.world.reset();assert.equal(f.world.obstacles.length,0);}
 // Every life scene must keep ownership/grips correct away from world origin.
 for(const kind of LIFE_ACTIONS){const f=fixture(),anchor=new T.Vector2(4,3);if(kind==='flower')f.world.setFlowerPoint(anchor.x,anchor.y);const a=new LifeScene(kind,f.actors,f.scene,f.world,f.move,f.walk,()=>{},anchor,10);let done=false;for(let n=0;n<9000;n++){f.actors.forEach(f.walk);done=a.update(1/60);f.sync();if(kind==='gift'&&a.snapshot.bagOwner==='YW')assert(a.snapshot.transferGap!<1e-6,'Translated handoff jumps');if(done)break;}assert(done,kind+' shifted scene stuck');assert(!f.scene.getObjectByName('little-life-scene'));}
 console.log(JSON.stringify({passed:true,results,checks:['all normal stages','cancel every stage','single bag with exact grip handoff','one persistent flower and reset','finite poses','quiet event cues','no scene roots left']}));
