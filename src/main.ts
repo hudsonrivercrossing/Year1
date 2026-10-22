@@ -245,7 +245,7 @@ function movementObstacles(i:number){
  if(staging&&staging.time<1.1)return all.filter(o=>o.kind==='flower');
  const escape=staging?.escape?.[i]??pickupEscapes?.[i];return all.filter(o=>{const key=o.owner+'-'+o.kind;if(!escape?.has(key))return true;if(obstacleClearance(f,o)>.9){escape.delete(key);return true;}return false;});
 }
-function pairClearance(){if(activity==='wander'||activity==='recover'&&(props?.heldCount??0)>0)return 2.35;if(!staging&&['hug','kiss'].includes(activity))return 1.01;if(!staging&&['look','approach'].includes(activity))return 1.42;return 1.72;}
+function pairClearance(){if(activity==='wander'||activity==='recover'&&(props?.heldCount??0)>0)return 2.35;if(!staging&&(['hug','kiss'].includes(activity)||activity==='gift'&&encounter instanceof LifeScene&&['kiss-approach','kiss'].includes(encounter.phase)))return 1.01;if(!staging&&['look','approach'].includes(activity))return 1.42;return 1.72;}
 function moveTo(f:Figure,x:number,z:number,dt:number,speed:number){
  const i=figures.indexOf(f),other=figures[1-i],d=Math.hypot(x-f.x,z-f.z),padding=activity==='wander'?.95:.72;
  const obstacles=movementObstacles(i);if(encounter instanceof LifeScene)obstacles.push(...encounter.obstaclesFor(i));

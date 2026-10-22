@@ -69,13 +69,13 @@ export function findClearing(actors:readonly Point[],obstacles:readonly Obstacle
    const entries=[-13-c.z,13-c.z].filter(z=>!obstacles.some(o=>intersectsBox(o,c,-2.8,2.8,Math.min(-2.5,z-2.5),Math.max(1.4,z+1.4))));
    if(!entries.length)continue;entryZ=entries.reduce((a,b)=>Math.abs(a)<Math.abs(b)?a:b);
   }else if(!fixedFlower){
-   const radius=kind==='gift'?2.7:3.4;
+   const radius=3.4;
    if(Math.abs(c.x)+radius>bounds.wanderX||Math.abs(c.z)+radius>bounds.wanderZ||obstacles.some(o=>clearance(c,o)<radius+.2))continue;
   }
   const base=Math.atan2(actors[1].z-actors[0].z,actors[1].x-actors[0].x);
   for(let i=0;i<(fixedFlower?48:4);i++){
    const angle=fixedFlower?(i%16)*Math.PI/8:base+i*Math.PI/4,axis={x:Math.cos(angle),z:Math.sin(angle)};
-   const points=fixedFlower?[-1,1].map(s=>({x:c.x+s*1.1*axis.x-(1.9+Math.floor(i/16)*.45)*axis.z,z:c.z+s*1.1*axis.z+(1.9+Math.floor(i/16)*.45)*axis.x})):[-1,1].map(s=>({x:c.x+s*1.6*axis.x,z:c.z+s*1.6*axis.z}));
+   const points=kind==='gift'?[-1,1].map(s=>({x:c.x+s*1.6,z:c.z+1})):fixedFlower?[-1,1].map(s=>({x:c.x+s*1.1*axis.x-(1.9+Math.floor(i/16)*.45)*axis.z,z:c.z+s*1.1*axis.z+(1.9+Math.floor(i/16)*.45)*axis.x})):[-1,1].map(s=>({x:c.x+s*1.6*axis.x,z:c.z+s*1.6*axis.z}));
    if(points.some(p=>Math.abs(p.x)>bounds.wanderX||Math.abs(p.z)>bounds.wanderZ||obstacles.some(o=>clearance(p,o)<.8)))continue;
    const travel=distance(actors[0],points[0])+distance(actors[1],points[1]),cost=travel+(compact?8:0)+distance(mid,c)*.3+i*.025+(1-Math.abs((axis.x*viewerAxis.x+axis.z*viewerAxis.z)/(Math.hypot(viewerAxis.x,viewerAxis.z)||1)))*1.2;
    if(cost<score){score=cost;best={center:{...c},axis,points,entryZ,compact};}

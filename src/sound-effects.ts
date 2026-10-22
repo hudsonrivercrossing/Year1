@@ -1,4 +1,4 @@
-export type SoundCue='snap'|'drop'|'complete'|'awaken'|'wave'|'hug'|'dance'|'kiss'|'shy'|'holdHands'|'highFive'|'look'|'type'|'arrive'|'plant'|'gift';
+export type SoundCue='snap'|'drop'|'complete'|'awaken'|'wave'|'hug'|'dance'|'kiss'|'shy'|'holdHands'|'highFive'|'look'|'type'|'arrive'|'plant'|'gift'|'boxOpen'|'clasp';
 
 /** Soft, original Web Audio cues. All envelopes start/end at zero to avoid clicks. */
 export function scheduleCue(ctx:BaseAudioContext,output:AudioNode,cue:SoundCue,at:number,strength=1){
@@ -17,6 +17,8 @@ export function scheduleCue(ctx:BaseAudioContext,output:AudioNode,cue:SoundCue,a
  };
  const phrase=(notes:number[],spacing:number,duration:number,level:number)=>notes.forEach((hz,i)=>tone(hz,i*spacing,duration,level));
  switch(cue){
+  case 'boxOpen':tap(.018,1300,.08);tone(520,.02,.12,.012);break;
+  case 'clasp':tap(.018,2200,.025);tone(900,.005,.055,.012);break;
   case 'type':tap(.014,1800,.025);break;
   case 'arrive':tone(392,0,.14,.018);break;
   case 'plant':phrase([523.25,783.99],.13,.3,.025);break;
@@ -44,7 +46,7 @@ export class SoundEffects{
  private context?:AudioContext;
  private master?:GainNode;
  private nextImpact=0;
- private counts:Record<SoundCue,number>={snap:0,drop:0,complete:0,awaken:0,wave:0,hug:0,dance:0,kiss:0,shy:0,holdHands:0,highFive:0,look:0,type:0,arrive:0,plant:0,gift:0};
+ private counts:Record<SoundCue,number>={snap:0,drop:0,complete:0,awaken:0,wave:0,hug:0,dance:0,kiss:0,shy:0,holdHands:0,highFive:0,look:0,type:0,arrive:0,plant:0,gift:0,boxOpen:0,clasp:0};
  unlock(){
   try{
    if(!this.context){this.context=new AudioContext();this.master=this.context.createGain();this.master.gain.value=.28;this.master.connect(this.context.destination);}
