@@ -36,7 +36,7 @@ def expand(name,a,t,color,geo,depth=0):
    # Double-sided material makes mirrored subparts and BFC inversion safe.
    for tri in ([(0,1,2)] if kind=='3' else [(0,1,2),(0,2,3)]):
     for i in tri:geo[c].extend(vs[i])
-parts=['99930','3626cp8r','90540','3899','33120','6254','3626cp8y','3626cp01','973','3815','3816','3817','3818','3819','3820','3901','87991','4530']
+parts=['3032','3005','4079','3023','3069b','3068b','3024','99249','24866','99930','3626cp8r','90540','3899','33120','6254','3626cp8y','3626cp01','973','3815','3816','3817','3818','3819','3820','3901','87991','4530']
 for part in parts:
  geo=defaultdict(list);expand(part+'.dat',[1,0,0,0,1,0,0,0,1],[0,0,0],'16',geo)
  (out/(part+'.json')).write_text(json.dumps(dict(geo),separators=(',',':')))

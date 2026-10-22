@@ -6,7 +6,7 @@ async page=>{
   await page.locator('#moments summary').click();if((await read()).autoInteractions)await page.locator('#surprises').click();await page.keyboard.press('Escape');
   for(const lang of ['zh','en']){
    if((await read()).language!==lang)await page.locator('#language').click();const follow=(await read()).autoFraming;await page.locator('#moments summary').click();await page.waitForTimeout(800);
-   for(const tab of ['affection','together','stories']){
+   for(const tab of ['affection','together','stories','life']){
     await page.locator('#library-tab-'+tab).click();await page.waitForTimeout(250);const panel=await page.locator('.moments-list').boundingBox(),s=await read();
     assert(panel.height<=244&&panel.x>=0&&panel.x+panel.width<=view.width+1&&panel.y>=0&&panel.y+panel.height<view.height,'Card bounds '+JSON.stringify({view,lang,tab,panel}));
     const buttons=await page.locator('#library-panel-'+tab+' button:visible').evaluateAll(bs=>bs.map(n=>n.getBoundingClientRect().height));assert(buttons.every(h=>h>=44),'Small touch target');

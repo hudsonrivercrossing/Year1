@@ -33,7 +33,7 @@ async page=>{
    if(await page.locator('html').getAttribute('lang')!==(lang==='zh'?'zh-CN':'en'))await page.locator('#language').click();
    const label=await page.locator('#moments summary').innerText();assert(lang==='zh'?label.includes('小小心动'):label.includes(view.width<=700||view.width<=1000&&view.height<=500?'Moments':'Little moments'),'Menu name changed '+label);
    await page.locator('#moments summary').click();
-   for(const tab of ['affection','together','stories']){
+   for(const tab of ['affection','together','stories','life']){
     await page.locator('#library-tab-'+tab).click();const box=await page.locator('.moments-list').boundingBox();assert(box.x>=0&&box.x+box.width<=view.width+1&&box.y>=0&&box.y+box.height<=view.height,'Menu outside viewport '+JSON.stringify({view,lang,tab,box}));
    }
    await page.keyboard.press('Escape');
@@ -42,9 +42,15 @@ async page=>{
   }
  }
  await page.setViewportSize({width:390,height:844});await page.locator('#moments summary').click();await page.locator('#library-tab-affection').click();await page.locator('#highFive').click();await page.locator('#stop').waitFor();await page.locator('#stop').click();await page.waitForFunction(()=>{const h=document.querySelector('#hug');return h&&!h.disabled;},null,{timeout:45000});
+ const advanced=[];
+ for(const id of ['overtime','flower','gift']){
+  await page.locator('#moments summary').click();await page.locator('#library-tab-life').click();await page.locator('#'+id).click();await page.locator('#stop').waitFor();
+  if(id==='overtime'){await page.waitForTimeout(8500);await page.screenshot({path:'output/playwright/life-office-production.png'});await page.locator('#stop').click();}
+  await page.waitForFunction(()=>{const h=document.querySelector('#hug');return h&&!h.disabled;},null,{timeout:90000});advanced.push({id,cancelled:id==='overtime'});
+ }
  await page.locator('#fit').click();await page.locator('#moments summary').click();await page.locator('#rebuild-menu').click();await page.locator('#mode-free').waitFor();assert(await page.locator('#auto').isVisible(),'Guided rebuild failed');await page.locator('#mode-free').click();await page.locator('#hint').waitFor();
  assert(requests.some(p=>p.startsWith('/Year1/models/'))&&requests.some(p=>p.startsWith('/Year1/textures/'))&&requests.some(p=>p.startsWith('/Year1/fonts/')),'Runtime assets not requested');
  assert(requests.every(p=>p.startsWith('/Year1/')),'Escaped base: '+requests.filter(p=>!p.startsWith('/Year1/')).join(','));
  assert(!errors.length&&!failed.length,JSON.stringify({errors,failed}));
- return{passed:true,url:page.url(),layouts,audio,playing,requests:[...new Set(requests)],errors,failed,checks:['model/texture/font/music base paths','credit links','no autoplay','quiet playback and fade','independent sound effects','bilingual toolbar and three-tab menu','phone/landscape/desktop layouts','cancel/recover/rebuild','no development global']};
+ return{passed:true,advanced,url:page.url(),layouts,audio,playing,requests:[...new Set(requests)],errors,failed,checks:['model/texture/font/music base paths','credit links','no autoplay','quiet playback and fade','independent sound effects','bilingual toolbar and four-tab menu','phone/landscape/desktop layouts','cancel/recover/rebuild','no development global']};
 }

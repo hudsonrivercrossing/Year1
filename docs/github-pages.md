@@ -5,7 +5,7 @@
 - 发布源：main 的 GitHub Actions；仅上传 dist-pages 生产资源。
 - 构建：Node.js 22、npm ci、npm run build:pages。
 - Vite pages 模式：base=/Year1/、outDir=dist-pages。默认模式保留根路径构建，现有 ChatGPT Site 保留。
-- 当前三个高级动作仅完善流程和 TODO，不包含运行实现，见 advanced-scenes-plan.md。
+- 三个高级动作已实现，入口“小小心动 → 生活”；种花最多保留一朵，重拼清除；完整流程见 advanced-scenes-plan.md。
 
 ## 发布历史与本地原件
 
@@ -28,10 +28,10 @@ git -C /absolute/path/to/year1-public push origin main refs/tags/v1.0.0
 本地生产包验收通过：
 
 - 根路径与 /Year1/ 两种构建通过，保留现有 Three.js 分包体积提示。
-- 四种手机竖屏、844×390 横屏、1440×960 桌面 × 中英文，共 12 种布局无溢出；三个菜单页和「小小心动 / Little moments / Moments」名称正确。
+- 四种手机竖屏、844×390 横屏、1440×960 桌面 × 中英文，共 12 种布局无溢出；四个菜单页和「小小心动 / Little moments / Moments」名称正确。
 - 模型、衣服贴图、三套字体、音乐及素材署名链接均保留 /Year1/ 前缀，无页面异常或资源 HTTP 错误；生产包无开发检查全局。
-- 音乐默认关闭、点击后实际播放、音量 0.14、淡出暂停；双语切换与音效静音独立。
-- 牵手与击掌夹手距离约 0.22；手机拼装仰角约 60.19°、游玩约 36°；拥抱手臂错位、亲亲与取消/拾回道具均通过。
+- 音乐默认关闭、点击后实际播放、音量 0.14、淡出暂停；双语切换不影响播放，交互音效始终开启。
+- 牵手与击掌夹手距离约 0.22；手机拼装仰角约 46°、游玩约 29°；拥抱手臂错位、亲亲与取消/拾回道具均通过。
 - 触屏浏览器模拟：真实 touch 输入拖拽安装、目标高亮、单指环绕、轻点解锁音乐、菜单切页和横竖屏通过；不作为实机验收。
 - 自由拼装真实鼠标拖拽、高亮、永久虚影及重拼通过；1,200 次固定种子随机选择无近期重复。
 
@@ -60,3 +60,5 @@ git -C /absolute/path/to/year1-public push origin main refs/tags/v1.0.0
 ## 对外 README 素材
 
 按用户明确要求，README 展示实物纪念相框照片，完整副本位于 `readme-assets/anniversary-frame.png`。该文件与最初上传的 726×866 PNG 逐字节一致，没有裁切或补画。此授权仅针对这张展示用照片；`assets/` 原始目录、Blender 和其他私有素材仍不进入公开历史。跳舞 GIF 录自现有网页动作，零件图鉴渲染自当前 GLB 模型，保留 LDraw 署名和原创近似说明。
+
+本轮三个高级场景正常结束／中断、单实例交接、唯一花与重拼、四件原道具拾回通过；四页签 40 个手机菜单状态与 /Year1/ 资源验证见 mobile-actions-validation.md。

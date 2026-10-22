@@ -1,6 +1,15 @@
 {
   "source": "https://library.ldraw.org/library/updates/complete.zip",
   "parts": [
+    "3032",
+    "3005",
+    "4079",
+    "3023",
+    "3069b",
+    "3068b",
+    "3024",
+    "99249",
+    "24866",
     "99930",
     "3626cp8r",
     "90540",
@@ -24,5 +33,5 @@
   "originalApproximations": [
     "yw-long-bangs-approx"
   ],
-  "sourceFiles": 95
+  "sourceFiles": 121
 }
