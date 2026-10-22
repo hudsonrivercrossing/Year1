@@ -35,6 +35,20 @@ git -C /absolute/path/to/year1-public push origin main refs/tags/v1.0.0
 - 触屏浏览器模拟：真实 touch 输入拖拽安装、目标高亮、单指环绕、轻点解锁音乐、菜单切页和横竖屏通过；不作为实机验收。
 - 自由拼装真实鼠标拖拽、高亮、永久虚影及重拼通过；1,200 次固定种子随机选择无近期重复。
 
-浏览器模拟不等于实体 iPhone / Android 验收，实机触摸、声音与性能仍在 TODO。线上部署结果待下方记录。
+浏览器模拟不等于实体 iPhone / Android 验收，实机触摸、声音与性能仍在 TODO。线上部署结果见下方记录。
 
 实现参考：[Vite Pages](https://vite.dev/guide/static-deploy.html#github-pages) · [GitHub Pages 自定义 Actions](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)。
+
+## 首次线上发布 · 2026-10-21
+
+- 功能代码本地提交：77d2f9d3af24a04426fa8470df2efa7b98c5c6a1。
+- 清理后的公开提交：9394798b9773a93a3ac68af426b82777105c033f。
+- [构建和部署工作流](https://github.com/hudsonrivercrossing/Year1/actions/runs/39699582655)：build、deploy 均 success；Pages 部署 7240545615 对应同一公开提交。
+- GitHub 仓库 public、默认分支 main；Pages build_type=workflow，HTTPS 已启用。
+- 对公开网址运行 check-pages.js：四个手机竖屏、一个横屏与一个桌面 × 中英文，12 种布局通过；模型、贴图、字体和音乐加载正常，无页面异常或 HTTP 资源错误；取消/恢复/重拼通过。
+- 146 个线上文件逐一 SHA256 与已验收 dist-pages 相同。
+- 当前版本与 v1.0.0 文件树在排除私有目录后逐项一致；全部 19 个历史提交均完成同样核对。9 个私有原件的 blob ID 均不存在于公开可达对象中；禁止路径和常见凭据特征扫描通过。
+- 本机 v1.0.0 保持原 SHA；GitHub v1.0.0 指向清理后的 2cc79b67cb1b3654df7fe598613f5d66c702a5cd。
+- 现有 ChatGPT Site 保留；本轮未修改其部署或访问范围。
+
+后续本记录与 TODO 的文档提交不改变经过验收的生产资源；代码推送 main 后继续由 Actions 自动发布。

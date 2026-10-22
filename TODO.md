@@ -92,4 +92,4 @@
 
 - [x] Little Days 轻和风音乐版本 `60e930d` 发布成功，部署 `appgdep_6ad955945aec8191b121fb679353d4eb`；146 个生产资源与本地 SHA256 一致。
 
-- [ ] Year1：GitHub Pages /Year1/ 子路径、自动发布、双语与手机验收；保留 v1.0.0 并从全部公开历史排除原始照片、Blender 与凭据。
+- [x] [Year1](https://hudsonrivercrossing.github.io/Year1/)：GitHub Pages /Year1/ 子路径、自动发布、双语与手机浏览器验收完成；146 个线上资源 SHA256 与本地一致。保留 v1.0.0，从全部公开历史排除原始照片、Blender 与凭据；[部署记录](docs/github-pages.md)。
