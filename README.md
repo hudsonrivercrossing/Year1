@@ -73,3 +73,27 @@ A little world for our first year together. Build us, bring us to life, and stay
     <td align="center" colspan="2"><img src="readme-assets/ice-cream.png" alt="YW 左手的橙色一体甜筒 33120" width="150"><br>YW 左手 · 橙色甜筒<br><code>33120</code></td>
   </tr>
 </table>
+
+### 小小生活里的道具
+
+加一会儿班的桌椅电脑、种花的小花苗，还有 DJ 送给 YW 的包。
+
+<table align="center">
+  <tr>
+    <td align="center"><img src="readme-assets/part-3032.png" alt="桌面 3032" width="150"><br>桌面<br><code>3032</code><br><sub>4 × 6 板</sub></td>
+    <td align="center"><img src="readme-assets/part-3005.png" alt="桌腿／椅座支撑 3005" width="150"><br>桌腿／椅座支撑<br><code>3005</code><br><sub>1 × 1 砖</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="readme-assets/part-4079.png" alt="座椅 4079" width="150"><br>座椅<br><code>4079</code><br><sub>人仔座椅</sub></td>
+    <td align="center"><img src="readme-assets/part-3068b.png" alt="电脑底座、翻盖／花底座 3068b" width="150"><br>电脑底座、翻盖／花底座<br><code>3068b</code><br><sub>2 × 2 光面板</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="readme-assets/part-99249.png" alt="花茎 99249" width="150"><br>花茎<br><code>99249</code><br><sub>花茎连接件</sub></td>
+    <td align="center"><img src="readme-assets/part-24866.png" alt="花瓣／手持花苗 24866" width="150"><br>花瓣／手持花苗<br><code>24866</code><br><sub>五瓣花</sub></td>
+  </tr>
+  <tr>
+    <td align="center" colspan="2"><img src="readme-assets/part-3023.png" alt="包体基础 3023" width="150"><br>包体基础<br><code>3023</code><br><sub>1 × 2 板</sub></td>
+  </tr>
+</table>
+
+电脑屏幕与键盘、包身外壳与提手扣件为原创装饰，暂无标准零件编号。

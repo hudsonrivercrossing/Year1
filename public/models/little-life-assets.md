@@ -25,3 +25,12 @@ Furniture, laptop and bag belong to one transient scene and are removed on
 normal completion, cancellation and rebuild. Gift transfer moves one world-space
 instance continuously before changing its owner; original held accessories use
 the existing shared drop/recovery transaction.
+
+## Illustrated catalog
+
+The public [README parts gallery](../../README.md#小小生活里的道具) includes
+renderings of all seven standard part IDs used by these scenes. The thumbnails
+show the standard source geometry, not the completed furniture or handbag.
+Laptop screen/keys and bag shell/handles/flap/clasp remain custom geometry with
+no official part number. Future flower variants, gift box and refined Birkin
+styling are planned in TODO.md and are not represented as shipped parts here.
