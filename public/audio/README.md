@@ -22,7 +22,7 @@ This note records provenance; it does not assert a public-domain or third-party 
 
 The earlier Our Little World file is preserved as an alternate, not loaded by the page.
 
-## Current default: Built With Love
+## Previous default: Built With Love
 
 - File: `built-with-love.mp3`
 - Duration: 71.053061 seconds (ffprobe); 1,137,518 bytes
@@ -33,3 +33,15 @@ The earlier Our Little World file is preserved as an alternate, not loaded by th
 - Privacy: submitted only a generic theme and arrangement brief; no names, photograph or personal relationship details were sent in the successful generation.
 - File signal: mean −17.5 dBFS, peak −0.6 dBFS (ffmpeg volumedetect). Page uses 0.20 volume with the existing 1.1-second fades, loop enabled and music off until clicked. Effect volume is independent.
 - Earlier versions are preserved as alternates.
+
+## Current default: Little Days
+
+- File: `little-days.mp3`
+- Generation task: `79fc36a5-619d-4fd6-af6d-3c998a8f92cd`
+- Source: https://cdn.treblo.com/pubapi/generations3/audio_79fc36a5-619d-4fd6-af6d-3c998a8f92cd_0.mp3
+- Model: Treblo v3-preview; original instrumental, no reference recording uploaded.
+- Brief: cozy Japanese slice-of-life game music with a tiny cooking-game bounce; around 84 BPM, major pentatonic melody, generous rests, felt piano, restrained koto, woody marimba, pizzicato strings and occasional airy flute. No busy melody, loud drums, swells, vocals or interaction effects. These are requested musical directions, not an independently verified instrument/tempo transcription.
+- Privacy: generic game-world and arrangement brief only, no names or photograph. No existing soundtrack was supplied or quoted in the prompt.
+- Raw generated audio is retained locally as `assets/audio/little-days-original.mp3`; only the quieter playback edition is included in the hosted app. Earlier tracks remain available as alternates.
+- Duration: 60.186122 seconds; playback file 1,204,927 bytes. Original integrated loudness -14.42 LUFS; applied fixed gain -5.580 dB, 0.25-second intro and 0.7-second outro fades. Playback edition: -20.44 LUFS, true peak -6.40 dBTP. No normalization boost or dynamic compression.
+- Page volume: 0.14 (previously 0.20), 1.1-second toggle fades, loop enabled, off until a click. Existing independent effects are unchanged. Loop playback is enabled; beat-perfect seamless looping is not claimed.

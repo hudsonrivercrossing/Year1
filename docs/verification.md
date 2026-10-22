@@ -116,3 +116,11 @@ Replaced large glyphs with consistent 20px fine-line SVGs for greeting, heart an
 Production build passed. Actual browser checks passed: visible icons, pressed/disabled state during wave, restoration afterward, bilingual 390px layout without horizontal overflow, 44px control heights, and reset to assembly. Screenshots: `actions-refined-en.png`, `actions-refined-detail.png`, `actions-refined-mobile-en.png`, `actions-refined-mobile-zh.png`.
 
 The original shared conversation was successfully read through the browser after web fetch failed. The Prompt follow-up is documented in `docs/prompt-control-proposal.md`; no API integration was implemented in this change.
+
+## Little Days: quieter Japanese game-music direction (2026-10-21)
+
+Original Treblo v3-preview instrumental, task `79fc36a5-619d-4fd6-af6d-3c998a8f92cd`. The brief requested a cozy wa-fu slice-of-life arrangement, a restrained cooking-game bounce, pentatonic space, felt piano and koto/wooden plucks, without vocals, big percussion or app interaction effects. No existing soundtrack or private photo was supplied. This describes the brief; perceived style remains for the user to judge.
+
+Raw duration 60.186122s; prepared file 60.186122s. Applied -5.580 dB fixed attenuation, 0.25s intro/0.7s outro fades. Prepared file measured -20.44 LUFS and -6.40 dBTP. Browser gain reduced from 0.20 to 0.14; original raw and earlier tracks retained.
+
+Actual browser checks passed: new local MP3 loads and time advances, no autoplay, 0.14 final volume, loop enabled, switching language continues playback, effects mute independently, and music fades to zero then pauses. Updated deterministic fade checks also passed. TypeScript/Vite production build passed. Beat-perfect seamless looping and physical-device listening were not claimed.
