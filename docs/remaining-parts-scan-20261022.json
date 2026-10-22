@@ -1,0 +1,29 @@
+[
+  {
+    "archive": "little-brick-ldraw.zip",
+    "sha256": "f3e496d0ede69ca7942fa4aa198e661ee2d22723906101e2e339d8917a4dd5f2",
+    "files": 37261,
+    "hits": {
+      "17346": [],
+      "75867": [],
+      "973pb5102": [],
+      "973pb3541": [],
+      "Fair Isle": [
+        "ldraw/parts/92241p0x.dat",
+        "ldraw/parts/92456p0x.dat"
+      ]
+    }
+  },
+  {
+    "archive": "year1-unofficial-20261022.zip",
+    "sha256": "32351ee35b8f5d18644d292496f5a348a46c691c962f8c5f9691e3bdf72830a4",
+    "files": 9516,
+    "hits": {
+      "17346": [],
+      "75867": [],
+      "973pb5102": [],
+      "973pb3541": [],
+      "Fair Isle": []
+    }
+  }
+]

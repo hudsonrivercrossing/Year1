@@ -76,7 +76,18 @@
 
 ### 小小生活里的道具
 
-加一会儿班的桌椅电脑、种花的小花苗，还有 DJ 送给 YW 的包。
+YW 加一会儿班，DJ 在桌边小跑陪伴；一起种下五朵花，种满后陪花跳支舞；还有 DJ 藏在身后的暖棕色小惊喜。
+
+<table align="center">
+  <tr><td align="center" colspan="2"><img src="readme-assets/office-desk.png" alt="当前游戏里的办公桌、单把椅子与笔记本电脑" width="360"><br>加一会儿班 · A little overtime<br><sub>标准板砖与座椅组装；电脑屏幕和键盘为原创装饰</sub></td></tr>
+  <tr><td align="center" colspan="2"><img src="readme-assets/flower-garden.png" alt="粉、黄、紫、白、蓝五种积木组合的纪念花" width="560"><br>我们的五朵花 · Five little flowers<br><sub>粉色、浅黄、淡紫、奶白、浅蓝；共用 3068b 底座、99249 花茎，以 24866 花瓣作五种刚性组合</sub></td></tr>
+  <tr>
+    <td align="center"><img src="readme-assets/gift-bag.png" alt="暖棕色原创包，双圆提手、翻盖、皮带、金色扣件与缝线" width="250"><br>送你一只包 · A bag for you<br><sub>3023 基础板＋原创包身、提手、扣件与缝线</sub></td>
+    <td align="center"><img src="readme-assets/gift-box.png" alt="橙色礼盒与深棕缎带" width="250"><br>一点小惊喜 · A little surprise<br><sub>原创礼盒、盒盖与缎带；打开取包后收好</sub></td>
+  </tr>
+</table>
+
+上图直接渲染自当前游戏使用的模型。下面是这些道具用到的标准基础零件；组合造型不另编官方零件编号。
 
 <table align="center">
   <tr>
@@ -96,4 +107,6 @@
   </tr>
 </table>
 
-电脑屏幕与键盘、包身外壳与提手扣件为原创装饰，暂无标准零件编号。
+电脑屏幕与键盘、包身外壳、双提手、皮带、扣件、缝线、礼盒与爱心为原创装饰，无标准零件编号。包参考暖棕色 Birkin 家族的造型语言，不含品牌标志，不宣称官方 LEGO 联名或已确认的真实礼物款式。
+
+标准几何保留 LDraw 来源与许可，发型近似和上衣重绘也分别标注。详见 [道具来源](public/models/little-life-assets.md)、[零件复核](docs/photo-parts-followup.md) 与 [剩余事项](TODO.md)。图鉴可用 `scripts/props-catalog.html` 与 `scripts/capture-props-catalog.js` 从当前模型重新生成。

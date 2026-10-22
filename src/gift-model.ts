@@ -4,7 +4,7 @@ const block=(x:number,y:number,z:number,color:string)=>mesh(new T.BoxGeometry(x,
 /** Original small leather-style accessory. No logo or official LEGO claim. */
 export function makeGiftBag(make:(id:string,color:string)=>T.Group){
  const bag=new T.Group(),leather='#a96e3e',edge='#805333',gold='#d4b474';bag.name='one-gift-bag';
- const plate=make('3023',leather);plate.rotation.y=Math.PI/2;plate.position.y=.12;bag.add(plate);
+ const plate=make('3023',leather);plate.position.y=.12;bag.add(plate);
  const shape=new T.Shape();shape.moveTo(-.65,.08);shape.lineTo(.65,.08);shape.lineTo(.75,.78);shape.quadraticCurveTo(0,.87,-.75,.78);shape.closePath();
  const body=mesh(new T.ExtrudeGeometry(shape,{depth:.57,bevelEnabled:true,bevelSize:.035,bevelThickness:.035,bevelSegments:2,steps:1}),leather);body.position.z=-.285;bag.add(body);
  const flap=block(1.48,.25,.055,edge);flap.position.set(0,.67,.327);bag.add(flap);
