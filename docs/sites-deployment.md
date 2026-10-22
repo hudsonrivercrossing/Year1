@@ -5,11 +5,11 @@
 - 发布日期：2026-10-21。
 - 发布状态：Sites 原生操作返回 `succeeded`。
 - 项目 ID：`appgprj_6ad83efe21fc8191b7860f21faf541e8`。
-- 部署 ID：`appgdep_6ad955eef80881919fca63ab55142e3f`。
-- 版本 ID：`appgprj_6ad83efe21fc8191b7860f21faf541e8~appgver_3e295e3c22a081918bba222db3e31f6e`。
-- 对应本地功能提交：`fe392e5`（恢复小小心动菜单名称）；音乐 `60e930d`；视角、动作与菜单 `3f5fc4b`。`v1.0.0` 标签保持不变。
-- Sites 源码提交：`118df7cabe38aca98b9f0869cfd535a610b4fdfb`。
-- 本次增量：动作菜单恢复为「小小心动」；英文桌面 Little moments、手机 Moments。保留分页菜单与现有功能。
+- 部署 ID：`appgdep_6ad95a6cc1fc8191bfdc37b1fb2b368b`。
+- 版本 ID：`appgprj_6ad83efe21fc8191b7860f21faf541e8~appgver_4149fef220688191af51efdf604b4a0a`。
+- 对应本地功能提交：`42cddc9`（手机取景与直接拼装工具）；`v1.0.0` 标签保持不变。
+- Sites 源码提交：`84d127d145b14ace5dd824d0b499c732bc12cb24`。
+- 本次增量：手机拼装约 46°、漫步约 29°并拉远；“找一块／帮放好、再散开、取景”三个并列小工具，更新字体子集。
 - 本轮内容：手机工作台布局、照片部件与配色、六个新动作、两条新组合、四件手持物的放落/返回拾取；[验收记录](mobile-actions-validation.md)。
 - 发布构建与本地生产构建的 146 个文件逐一 SHA256 一致。
 

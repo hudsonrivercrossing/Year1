@@ -14,3 +14,11 @@
 - 默认根路径与 /Year1/ 两种生产构建通过；生产资源、字体、音乐与双语布局验收见 check-pages.js。
 
 浏览器模拟仍不作为实体手机性能和声音验收。三个高级动作继续保留在 TODO，本轮没有加入运行实现。
+
+## 发布
+
+原私有 ChatGPT Site 发布 succeeded：appgdep_6ad95a6cc1fc8191bfdc37b1fb2b368b；146 个文件与本地根路径构建 SHA256 一致，访问范围保持不变。
+
+GitHub Pages 功能提交 bcc5c14a34e187e6cde28a08cc6b7b55737ac582：[自动发布记录](https://github.com/hudsonrivercrossing/Year1/actions/runs/39700629359)，build 与 deploy 均 success。
+
+Year1 线上 146 个文件逐一 SHA256 与本地 /Year1/ 构建完全一致；文档记录补充不改变生产资源。
