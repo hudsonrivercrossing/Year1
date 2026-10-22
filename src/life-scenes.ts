@@ -82,7 +82,7 @@ export class LifeScene{
  private advance(){this.index++;this.time=0;}
  private positions(points:number[][],dt:number){let arrived=true;this.actors.forEach((f,i)=>{const[x,z]=points[i],d=Math.hypot(f.x-x,f.z-z);if(d>.03){arrived=false;this.move(f,x,z,dt,2.4);this.walk(f,.85);}});return arrived;}
  private face(dt:number){this.actors.forEach((f,i)=>turn(f,this.kind==='overtime'?0:this.kind==='flower'?Math.atan2(-5-f.x,-3-f.z):i===0?Math.PI/2:-Math.PI/2,dt));}
- private seated(k:number){this.seatBlend=k;this.actors.forEach(f=>{f.legPivots.forEach(p=>p.rotation.x=-Math.PI/2*k);f.heightOffset=-.23*k;f.parts.rightArm.rotation.x=-.85*k;f.parts.leftArm.rotation.x=-.85*k;headPose(f,.05*k);});}
+ private seated(k:number){this.seatBlend=k;this.actors.forEach((f,i)=>{f.legPivots.forEach(p=>p.rotation.x=-Math.PI/2*k);f.heightOffset=-.23*k;f.parts.rightArm.rotation.x=(i===1?-1.6:-.7)*k;f.parts.leftArm.rotation.x=(i===0?-1.6:-.7)*k;headPose(f,.05*k);});}
  private updateRoots(){for(const f of this.actors){f.root.position.set(f.x,2.52+f.heightOffset,f.z);f.root.rotation.y=f.heading;}this.scene.updateMatrixWorld(true);}
  private holdGift(position:T.Vector3){this.gift.position.copy(position).add(new T.Vector3(0,-1.08,0));this.gift.rotation.set(0,0,0);}
  cancel(){
