@@ -2,9 +2,9 @@ async page=>{
  const errors=[];page.on('pageerror',e=>errors.push(String(e)));const assert=(c,m)=>{if(!c)throw Error(m);};const read=()=>page.evaluate(()=>window.__brickWorld),views=[{width:320,height:568},{width:390,height:667},{width:390,height:844},{width:430,height:932}],results=[];
  const bounds=async()=>page.evaluate(()=>{const r=document.querySelector('.moments-list').getBoundingClientRect();return{x:r.x,y:r.y,right:r.right,bottom:r.bottom};});
  for(const view of views){
-  await page.setViewportSize(view);await page.evaluate(()=>{localStorage.clear();localStorage.setItem('little-world-hints','off');});await page.reload();await page.locator('#build-assist-toggle').waitFor();
+  await page.setViewportSize(view);await page.evaluate(()=>{localStorage.clear();localStorage.setItem('little-world-hints','off');});await page.reload();await page.locator('#hint').waitFor();
   assert(await page.locator('#hint-toggle').count()===0,'Hint switch should be removed');assert((await read()).hintsOn,'Old saved off-state should not hide picked-part highlight');
-  await page.locator('#build-assist-toggle').click();assert(await page.locator('#hint').isVisible(),'Build help missing');await page.keyboard.press('Escape');assert(!await page.locator('#hint').isVisible(),'Help did not close');
+  assert(await page.locator('.build-tool-row button:visible').count()===3,'Expected three direct build tools');await page.locator('#hint').click();assert(await page.locator('#hint').getAttribute('data-ready')==='true','Find did not offer place');await page.locator('#hint').click();assert((await read()).count===1,'Contextual place failed');
   if(view.height===844)await page.screenshot({path:'output/playwright/toolbar-v4-free.png'});
   await page.locator('#mode-guided').click();await page.locator('#auto').click();await page.locator('#life').waitFor({timeout:9000});
   for(const lang of ['zh','en']){if((await read()).language!==lang)await page.locator('#language').click();const buttons=await page.locator('#tools>button').evaluateAll(bs=>bs.map(b=>{const r=b.getBoundingClientRect();return{x:r.x,right:r.right,height:r.height};}));assert(buttons.every(b=>b.x>=0&&b.right<=view.width&&b.height>=44),'Ready buttons overflow '+JSON.stringify({view,lang,buttons}));}

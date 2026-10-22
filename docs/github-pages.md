@@ -52,3 +52,7 @@ git -C /absolute/path/to/year1-public push origin main refs/tags/v1.0.0
 - 现有 ChatGPT Site 保留；本轮未修改其部署或访问范围。
 
 后续本记录与 TODO 的文档提交不改变经过验收的生产资源；代码推送 main 后继续由 Actions 自动发布。
+
+## 手机取景与拼装工具更新
+
+拼装约 46°、漫步约 29°并拉远；找一块／帮放好、再散开、取景三个并列小工具替代展开菜单。本轮具体变更与验证见 [手机取景 v5](mobile-view-v5.md)。

@@ -71,14 +71,14 @@ document.addEventListener('keydown',()=>sounds.unlock(),{capture:true});
 $('sound').onclick=()=>{sounds.toggle();renderCopy();};
 let assemblyMode:'free'|'guided'='free';
 let freeAssembly:FreeAssembly|undefined;
-const buildCamera=()=>{if(phoneView()){const d=Math.max(40,12/(Math.tan(T.MathUtils.degToRad(camera.fov/2))*camera.aspect));return new T.Vector3(.56,1,.1).normalize().multiplyScalar(d);}if(assemblyMode==='guided')return new T.Vector3(8,10,camera.aspect<.85?24:17);const distance=Math.max(43,17/(Math.tan(T.MathUtils.degToRad(camera.fov/2))*camera.aspect));return new T.Vector3(.12,.85,1).normalize().multiplyScalar(distance);};
+const buildCamera=()=>{if(phoneView()){const d=Math.max(44,13.4/(Math.tan(T.MathUtils.degToRad(camera.fov/2))*camera.aspect));return new T.Vector3(.85,.9,.15).normalize().multiplyScalar(d);}if(assemblyMode==='guided')return new T.Vector3(8,10,camera.aspect<.85?24:17);const distance=Math.max(43,17/(Math.tan(T.MathUtils.degToRad(camera.fov/2))*camera.aspect));return new T.Vector3(.12,.85,1).normalize().multiplyScalar(distance);};
 // One mobile frame for awakening, follow and explicit reframe. A lower
 // elevation shows faces without losing the workbench and scattered pieces.
 function playView(){
  if(!phoneView())return{position:new T.Vector3(14,20,35),target:new T.Vector3(0,1,0)};
  const[a,b]=figures,target=new T.Vector3((a.x+b.x)/2,1.3,(a.z+b.z)/2);
- const distance=Math.max(16,(Math.abs(a.x-b.x)+5)/(2*Math.tan(T.MathUtils.degToRad(camera.fov/2))*camera.aspect),(Math.abs(a.z-b.z)+5)*1.4);
- return{target,position:target.clone().add(new T.Vector3(.1,.72,1).normalize().multiplyScalar(distance))};
+ const distance=Math.max(21,(Math.abs(a.x-b.x)+7)/(2*Math.tan(T.MathUtils.degToRad(camera.fov/2))*camera.aspect),(Math.abs(a.z-b.z)+7)*1.55);
+ return{target,position:target.clone().add(new T.Vector3(.1,.56,1).normalize().multiplyScalar(distance))};
 }
 function setBuildView(){camera.position.copy(buildCamera());controls.target.set(0,phoneView()?.4:1,0);controls.enabled=true;controls.enablePan=true;controls.enableZoom=true;controls.enableRotate=true;controls.mouseButtons.LEFT=T.MOUSE.ROTATE;controls.mouseButtons.RIGHT=T.MOUSE.PAN;controls.touches.ONE=T.TOUCH.ROTATE;controls.touches.TWO=T.TOUCH.DOLLY_PAN;pauseOrbitForPiece();controls.enabled=true;}
 function pauseOrbitForPiece(){
@@ -115,20 +115,33 @@ function activityStatus(){
  status(activity==='wander'?'':t(...ACTIONS[activity].copy));
 }
 function fitView(){autoFraming=phoneView();if(mode==='build'||mode==='ready')setBuildView();else{const view=playView();camera.position.copy(view.position);controls.target.copy(view.target);controls.update();}}
-const fitButton=()=>`<button id="fit" class="mobile-only fit-control" aria-label="${t('重新取景','Frame the workbench')}" title="${t('重新取景','Frame the workbench')}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4H4v4m12-4h4v4M4 16v4h4m12-4v4h-4M9 12h6m-3-3v6"/></svg></button>`;
+const fitButton=(build=false)=>`<button id="fit" class="mobile-only ${build?'build-tool':'fit-control'}" aria-label="${t('重新取景','Frame the workbench')}" title="${t('重新取景','Frame the workbench')}">${build?'<span class="tool-disc">':''}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4H4v4m12-4h4v4M4 16v4h4m12-4v4h-4M9 12h6m-3-3v6"/></svg>${build?`</span><span class="tool-caption">${t('取景','Frame')}</span>`:''}</button>`;
 
 
 function disposeClone(group:T.Group|undefined){if(!group)return;scene.remove(group);group.traverse(obj=>{if(obj instanceof T.Mesh){const mats=Array.isArray(obj.material)?obj.material:[obj.material];for(const mat of mats)mat.dispose();}});}
 function cloneIndependent(source:T.Group){const clone=source.clone(true);clone.visible=true;clone.traverse(o=>{if(o instanceof T.Mesh){o.material=(o.material as T.Material).clone();}});return clone;}
+const helperIcon=(ready:boolean)=>`<svg viewBox="0 0 24 24" aria-hidden="true">${ready?'<path d="M7 4v7a5 5 0 0 0 10 0V4M7 8h3m4 0h3M7 4h3v7a2 2 0 0 0 4 0V4h3"/><path d="m3 15 2 1m14 0 2-1M12 20v2"/>':'<path d="m12 3 1.8 6.2L20 12l-6.2 2.8L12 21l-1.8-6.2L4 12l6.2-2.8ZM20 3v4m-2-2h4"/>'}</svg>`;
 function freeTools(){
- $('tools').innerHTML=`<div class="assist-group" id="assist-group"><button id="build-assist-toggle" class="mobile-only" aria-expanded="false" aria-controls="assist-options">${t('帮我一下','A little help')}<svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 10 4-4 4 4"/></svg></button><div class="assist-options" id="assist-options"><button id="hint" class="hint-helper">${t('下一块提示','A little hint')}</button><button id="connect" class="hint-helper">${t('装上这一块','Place this piece')}</button><button id="scatter">${t('再散开一次','Scatter again')}</button></div></div>${fitButton()}`;
- $('hint').onclick=()=>{freeAssembly?.hint();refreshFreeButton();};
+ $('tools').innerHTML=`<div class="build-tool-row"><button id="hint" class="hint-helper build-tool"><span class="tool-disc">${helperIcon(false)}</span><span class="tool-caption">${t('找一块','Find a piece')}</span><span class="desktop-label">${t('下一块提示','A little hint')}</span></button><button id="connect" class="hint-helper desktop-connect">${t('装上这一块','Place this piece')}</button><button id="scatter" class="build-tool"><span class="tool-disc"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="6" height="6" rx="1" transform="rotate(-12 7 8)"/><rect x="14" y="12" width="6" height="6" rx="1" transform="rotate(14 17 15)"/><path d="m15 3 3 1-1 3M3 16l2 3 3-1"/></svg></span><span class="tool-caption">${t('再散开','Mix it up')}</span><span class="desktop-label">${t('再散开一次','Scatter again')}</span></button>${fitButton(true)}</div>`;
+ $('hint').onclick=()=>{
+  const selected=freeAssembly?.selected;
+  if(phoneView()&&selected&&freeAssembly?.eligible(selected))freeAssembly.connect(selected);
+  else{freeAssembly?.hint();if(phoneView())status(t('找到啦，再点一下帮你放好。','Found one. Tap again to place it.'));}
+  refreshFreeButton();
+ };
  $('connect').onclick=()=>{const p=freeAssembly?.selected;if(p&&freeAssembly?.eligible(p))freeAssembly.connect(p);};
- $('scatter').onclick=()=>{freeAssembly?.scatter();status('');};
- $('build-assist-toggle').onclick=()=>{const open=$('assist-group').classList.toggle('open');$('build-assist-toggle').setAttribute('aria-expanded',String(open));};$('fit').onclick=fitView;
+ $('scatter').onclick=()=>{freeAssembly?.scatter();refreshFreeButton();status('');};
+ $('fit').onclick=fitView;
  renderCopy();refreshFreeButton();
 }
-function refreshFreeButton(){const button=$<HTMLButtonElement>('connect');if(button)button.disabled=!freeAssembly?.selected||!freeAssembly.eligible(freeAssembly.selected);}
+function refreshFreeButton(){
+ const ready=!!freeAssembly?.selected&&freeAssembly.eligible(freeAssembly.selected);
+ const button=$<HTMLButtonElement>('connect');if(button)button.disabled=!ready;
+ const helper=$<HTMLButtonElement>('hint');if(!helper)return;
+ helper.dataset.ready=String(ready);helper.setAttribute('aria-label',phoneView()?(ready?t('帮放好选中的零件','Place the selected piece'):t('找一块可以拼装的零件','Find a piece to build')):t('下一块提示','A little hint'));
+ helper.querySelector('.tool-disc')!.innerHTML=helperIcon(ready);
+ helper.querySelector('.tool-caption')!.textContent=ready?t('帮放好','Place it'):t('找一块','Find a piece');
+}
 function startFree(){
  freeAssembly?.destroy();
  setBuildView();freeAssembly=new FreeAssembly(scene,figures,cloneIndependent,group=>disposeClone(group),renderer.domElement,camera,()=>{count++;sounds.play('snap');$('counter').innerHTML=`${String(count).padStart(2,'0')} <small>/ 12</small>`;if(count===12){freeAssembly?.destroy();freeAssembly=undefined;showNext();}else{status(t('又靠近一点点。','A little closer.'));refreshFreeButton();}},status,WORLD,speed=>sounds.play('drop',Math.min(1,speed/5)));
@@ -257,7 +270,7 @@ renderer.domElement.addEventListener('pointermove',e=>{if(assemblyMode==='free'&
 function release(e:PointerEvent,cancel=false){if(assemblyMode==='free'&&mode==='build'&&freeAssembly){if(dragging){dragging=false;controls.enabled=true;if(renderer.domElement.hasPointerCapture(e.pointerId))renderer.domElement.releasePointerCapture(e.pointerId);freeAssembly.end(cancel);refreshFreeButton();}return;}if(!dragging||!tray||!ghost)return;dragging=false;controls.enabled=true;renderer.domElement.style.cursor='grab';if(renderer.domElement.hasPointerCapture(e.pointerId))renderer.domElement.releasePointerCapture(e.pointerId);const a=tray.position.clone().project(camera),b=ghost.position.clone().project(camera);const r=renderer.domElement.getBoundingClientRect();const distance=Math.hypot((a.x-b.x)*r.width/2,(a.y-b.y)*r.height/2);if(!cancel&&distance<85)attach();else{tray.position.copy(trayHome);if(!cancel)status(t('再靠近一点点。','A little closer.'));}}
 renderer.domElement.addEventListener('pointerup',e=>release(e));renderer.domElement.addEventListener('pointercancel',e=>release(e,true));
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&mode==='build'&&(e.target===document.body||e.target===renderer.domElement)){e.preventDefault();if(assemblyMode==='guided')attach();else{const p=freeAssembly?.selected;if(p&&freeAssembly?.eligible(p))freeAssembly.connect(p);}}});
-function resize(){const r=$('scene').getBoundingClientRect();camera.aspect=r.width/r.height;camera.updateProjectionMatrix();renderer.setSize(r.width,r.height);if(mode==='build'||mode==='ready')setBuildView();}
+function resize(){const r=$('scene').getBoundingClientRect();camera.aspect=r.width/r.height;camera.updateProjectionMatrix();renderer.setSize(r.width,r.height);if(mode==='build'||mode==='ready')setBuildView();if(mode==='build'&&assemblyMode==='free')refreshFreeButton();}
 window.addEventListener('resize',resize);new ResizeObserver(resize).observe($('scene'));resize();
 controls.addEventListener('start',()=>{if(mode==='play')autoFraming=false;});
 const clock=new T.Clock();
@@ -277,12 +290,7 @@ if(import.meta.env.DEV)Object.defineProperty(window,'__brickWorld',{get:()=>{
  const project=(v:T.Vector3)=>{const r=renderer.domElement.getBoundingClientRect();const p=v.clone().project(camera);return {x:r.left+(p.x*.5+.5)*r.width,y:r.top+(-p.y*.5+.5)*r.height};};
  return {mode,assemblyMode,count,activity,sequence,cancelling,action:encounter?.snapshot??null,props:props?.snapshot??null,recentActions:[...recentActions],autoInteractions,nextAuto,autoFraming,effects:scene.children.filter(o=>o.name==='affection-heart').length,encounter:encounter?.phase??null,queue:[...queue],sweet,hintsOn,language:getLanguage(),sounds:sounds.snapshot,guided:tray&&ghost?{piece:project(tray.position),target:project(ghost.position)}:null,camera:{position:camera.position.toArray(),target:controls.target.toArray(),azimuth:controls.getAzimuthalAngle(),polar:controls.getPolarAngle()},music:{enabled:music.enabled,paused:music.audio.paused,time:music.audio.currentTime,volume:music.audio.volume,loop:music.audio.loop,source:music.audio.currentSrc},world:WORLD,portraits:characters.map(d=>({head:d.headPart,hair:d.hairPart,skin:d.skin,legs:d.legs,hips:d.hips,shirt:d.shirtCatalog,print:d.shirtPrint})),figures:figures.map(f=>({waist:f.waist.rotation.toArray(),heightOffset:f.heightOffset,feetY:f.footHeight(f.legPivots[0].rotation.x)+f.heightOffset,legs:f.legPivots.map(p=>p.rotation.toArray()),screen:project(f.root.position),head:f.parts.head.rotation.toArray(),hair:f.parts.hair.rotation.toArray(),headPosition:f.parts.head.position.toArray(),hairPosition:f.parts.hair.position.toArray(),arms:[f.parts.rightArm.rotation.toArray(),f.parts.leftArm.rotation.toArray()],x:f.x,z:f.z,speed:f.speed,pause:f.pause,heading:f.heading,target:[f.target.x,f.target.y]})),pieces:freeAssembly?.pieces.map(p=>({character:p.character,slot:p.slot,attached:p.attached,held:p===freeAssembly?.holding,hintVisible:p.ghost.visible,highlighted:Boolean(p.ghost.userData.highlighted),eligible:freeAssembly!.eligible(p),position:p.visual.position.toArray(),velocity:p.body.velocity.toArray(),screen:project(p.visual.position),target:project(freeAssembly!.target(p))}))??[]};
 }});
-document.addEventListener('pointerdown',e=>{
- if(!(e.target instanceof Node))return;
- const menu=$('moments') as HTMLDetailsElement;if(menu?.open&&!menu.contains(e.target))closeLibrary();
- const assist=$('assist-group');if(assist?.classList.contains('open')&&!assist.contains(e.target)){assist.classList.remove('open');$('build-assist-toggle')?.setAttribute('aria-expanded','false');}
-});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeLibrary(true);$('assist-group')?.classList.remove('open');$('build-assist-toggle')?.setAttribute('aria-expanded','false');}});
-document.addEventListener('pointerdown',e=>{if(!(e.target instanceof Element))return;if(!e.target.closest('#moments'))closeLibrary();if(!e.target.closest('#assist-group')){$('assist-group')?.classList.remove('open');$('build-assist-toggle')?.setAttribute('aria-expanded','false');}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLibrary(true);});
+document.addEventListener('pointerdown',e=>{if(e.target instanceof Element&&!e.target.closest('#moments'))closeLibrary();});
 renderCopy();
 void boot();

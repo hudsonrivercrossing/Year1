@@ -42,7 +42,7 @@ async page=>{
   }
  }
  await page.setViewportSize({width:390,height:844});await page.locator('#moments summary').click();await page.locator('#library-tab-affection').click();await page.locator('#highFive').click();await page.locator('#stop').waitFor();await page.locator('#stop').click();await page.waitForFunction(()=>{const h=document.querySelector('#hug');return h&&!h.disabled;},null,{timeout:45000});
- await page.locator('#fit').click();await page.locator('#moments summary').click();await page.locator('#rebuild-menu').click();await page.locator('#mode-free').waitFor();assert(await page.locator('#auto').isVisible(),'Guided rebuild failed');await page.locator('#mode-free').click();await page.locator('#build-assist-toggle').waitFor();
+ await page.locator('#fit').click();await page.locator('#moments summary').click();await page.locator('#rebuild-menu').click();await page.locator('#mode-free').waitFor();assert(await page.locator('#auto').isVisible(),'Guided rebuild failed');await page.locator('#mode-free').click();await page.locator('#hint').waitFor();
  assert(requests.some(p=>p.startsWith('/Year1/models/'))&&requests.some(p=>p.startsWith('/Year1/textures/'))&&requests.some(p=>p.startsWith('/Year1/fonts/')),'Runtime assets not requested');
  assert(requests.every(p=>p.startsWith('/Year1/')),'Escaped base: '+requests.filter(p=>!p.startsWith('/Year1/')).join(','));
  assert(!errors.length&&!failed.length,JSON.stringify({errors,failed}));

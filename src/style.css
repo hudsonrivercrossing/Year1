@@ -65,7 +65,6 @@ body[data-mode=play] .tools .moments-list button:hover:not(:disabled){background
 /* A growing library stays in one quiet paper menu. */
 :root{--space-xs:4px;--space-sm:8px;--space-md:12px;--space-lg:16px;--space-xl:24px;--z-popover:5}
 .mobile-only{display:none!important}
-.assist-group,.assist-options{display:contents}
 .fit-control{padding:10px;min-width:44px;border-radius:50%}
 .fit-control svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round}
 .moments-list{width:332px;max-height:min(66dvh,520px);overflow-y:auto;overscroll-behavior:contain;gap:var(--space-md);z-index:var(--z-popover);padding:var(--space-md);scrollbar-width:thin}
@@ -108,10 +107,6 @@ body[data-mode=play] .tools .surprises-toggle{display:flex;justify-content:space
  .tools button,body[data-mode=play] .tools button{min-height:44px;font-size:var(--text-small);padding:10px 12px}
  .mobile-only{display:inline-flex!important}
  .library-group.mobile-only{display:block!important}
- .assist-group{position:relative;display:block}
- .assist-options{display:none;position:absolute;bottom:calc(100% + 12px);left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100vw - 32px);padding:var(--space-sm);background:#f7f1e7;border:1px solid #d7cbbb;border-radius:16px;box-shadow:0 8px 30px #6a503315;z-index:var(--z-popover)}
- .assist-group.open .assist-options{display:flex;flex-direction:column;gap:var(--space-xs)}
- .assist-options button{border:0;background:transparent;text-align:left}
  body[data-mode=play] .tools .quick-action,body[data-mode=play] .tools .desktop-rebuild{display:none}
  body[data-mode=play] .tools #hug:disabled{display:none}
  body[data-mode=play] .tools #stop{font-size:var(--text-small);padding-inline:var(--space-sm);margin:0;white-space:nowrap}
@@ -133,9 +128,6 @@ body[data-mode=play] .tools .surprises-toggle{display:flex;justify-content:space
 body[data-mode=build] .tools button,body[data-mode=ready] .tools button{min-height:44px;border-radius:999px;padding:10px 18px}
 body[data-mode=build] .tools #connect:not(:disabled){color:var(--accent);border-color:#b8877566;background:#f0e2d4}
 body[data-mode=build] .tools #scatter{color:var(--muted);border-color:transparent;background:transparent}
-#build-assist-toggle{align-items:center;gap:8px}
-#build-assist-toggle svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round}
-.assist-group.open #build-assist-toggle svg{transform:rotate(180deg)}
 body[data-mode=play] .tools #hug{background:#f1e6d9;border-color:#ba968077}
 .moments summary .menu-chevron{width:13px;height:13px;margin-left:1px;stroke-width:1.2;transition:transform .18s}
 .moments[open] summary .menu-chevron{transform:rotate(180deg)}
@@ -160,7 +152,6 @@ body[data-mode=play] .tools #rebuild-menu{color:var(--muted);font-size:var(--tex
 body[data-mode=play] .tools #rebuild-menu svg{width:16px;height:16px}
 @media(max-width:700px), (max-width:1000px) and (max-height:500px){
  .moments-list{max-height:min(65dvh,420px)}
- body[data-mode=build] .tools .assist-options button{border-radius:10px;padding:10px 12px}
  body[data-mode=play] .tools #stop{border:1px solid #ccbaa477;border-radius:999px;background:#f7f1e780;padding-inline:10px}
 }
 @media(prefers-reduced-motion:reduce){.menu-chevron,.switch-track,.switch-track:after{transition:none}}
@@ -170,3 +161,24 @@ body[data-mode=play] .tools #rebuild-menu svg{width:16px;height:16px}
  body[data-mode=ready] .tools #reset{flex:none;white-space:nowrap}
 }
 body[data-mode=play] .tools .library-footer .surprises-toggle{justify-content:space-between}
+
+/* Three small, direct workbench tools. The first changes from find to place. */
+.build-tool-row{display:contents}
+.tool-disc,.tool-caption{display:none}
+@media(max-width:700px), (max-width:1000px) and (max-height:500px){
+ .build-tool-row{display:flex;align-items:flex-start;justify-content:center;gap:24px}
+ body[data-mode=build] .tools .build-tool{display:flex;flex-direction:column;align-items:center;gap:6px;width:72px;padding:0;border:0;background:transparent;border-radius:12px;color:var(--muted)}
+ .build-tool .desktop-label,.desktop-connect{display:none!important}
+ .tool-disc{display:grid;place-items:center;width:44px;height:44px;border:1px solid #cbbb9f88;border-radius:50%;background:#f7f1e780;transition:background .18s,border-color .18s,transform .18s}
+ .tool-disc svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.15;stroke-linecap:round;stroke-linejoin:round}
+ .tool-caption{display:block;white-space:nowrap;font-size:var(--text-caption);line-height:1.35}
+ .build-tool:active .tool-disc{transform:scale(.93)}
+ #hint[data-ready=true]{color:var(--accent)}
+ #hint[data-ready=true] .tool-disc{background:#efdfcc;border-color:#ba9680}
+ body[data-mode=build] #scene{bottom:calc(108px + env(safe-area-inset-bottom,0px))}
+}
+@media(max-height:500px) and (max-width:1000px){
+ .build-tool-row{gap:20px}.tool-caption{display:none}
+ body[data-mode=build] #scene{bottom:64px}
+}
+@media(prefers-reduced-motion:reduce){.tool-disc{transition:none}}

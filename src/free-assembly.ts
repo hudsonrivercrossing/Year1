@@ -58,7 +58,7 @@ export class FreeAssembly {
     this.scatter();
   }
   scatter(){
-    this.held=undefined;
+    this.held=undefined;this.selected=undefined;
     // Stratified random sampling covers all quadrants; shuffle identities so colours
     // and part types never fall into rows. Keep space around the assembly anchors.
     const remaining=this.pieces.filter(p=>!p.attached);
