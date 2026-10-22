@@ -95,5 +95,3 @@ A little world for our first year together. Build us, bring us to life, and stay
     <td align="center" colspan="2"><img src="readme-assets/part-3023.png" alt="包体基础 3023" width="150"><br>包体基础<br><code>3023</code><br><sub>1 × 2 板</sub></td>
   </tr>
 </table>
-
-电脑屏幕与键盘、包身外壳与提手扣件为原创装饰，暂无标准零件编号。
