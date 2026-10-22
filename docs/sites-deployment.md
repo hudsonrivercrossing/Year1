@@ -5,11 +5,11 @@
 - 发布日期：2026-10-21。
 - 发布状态：Sites 原生操作返回 `succeeded`。
 - 项目 ID：`appgprj_6ad83efe21fc8191b7860f21faf541e8`。
-- 部署 ID：`appgdep_6ad955945aec8191b121fb679353d4eb`。
-- 版本 ID：`appgprj_6ad83efe21fc8191b7860f21faf541e8~appgver_144fb6bb1c7c8191913d2a2f28ec8162`。
-- 对应本地功能提交：`60e930d`（Little Days 轻和风音乐与低音量版本）；视角、动作与菜单 `3f5fc4b`。`v1.0.0` 标签保持不变。
-- Sites 源码提交：`0fa8ec2a4bb7a13d30297c4eb8587b9743621b3d`。
-- 本次增量：新的原创纯音乐 Little Days，约 60 秒；文件响度降低至约 -20.44 LUFS，网页播放音量由 0.20 降至 0.14，保留渐变与独立互动音效。旧曲保留；原始生成音频留在本地，托管只包含播放版本。
+- 部署 ID：`appgdep_6ad955eef80881919fca63ab55142e3f`。
+- 版本 ID：`appgprj_6ad83efe21fc8191b7860f21faf541e8~appgver_3e295e3c22a081918bba222db3e31f6e`。
+- 对应本地功能提交：`fe392e5`（恢复小小心动菜单名称）；音乐 `60e930d`；视角、动作与菜单 `3f5fc4b`。`v1.0.0` 标签保持不变。
+- Sites 源码提交：`118df7cabe38aca98b9f0869cfd535a610b4fdfb`。
+- 本次增量：动作菜单恢复为「小小心动」；英文桌面 Little moments、手机 Moments。保留分页菜单与现有功能。
 - 本轮内容：手机工作台布局、照片部件与配色、六个新动作、两条新组合、四件手持物的放落/返回拾取；[验收记录](mobile-actions-validation.md)。
 - 发布构建与本地生产构建的 146 个文件逐一 SHA256 一致。
 
