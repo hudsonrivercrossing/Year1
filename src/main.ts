@@ -71,14 +71,15 @@ document.addEventListener('pointerdown',()=>sounds.unlock(),{capture:true,passiv
 document.addEventListener('keydown',()=>sounds.unlock(),{capture:true});
 let assemblyMode:'free'|'guided'='free';
 let freeAssembly:FreeAssembly|undefined;
-const buildCamera=()=>{if(phoneView()){const d=Math.max(44,13.4/(Math.tan(T.MathUtils.degToRad(camera.fov/2))*camera.aspect));return new T.Vector3(.85,.9,.15).normalize().multiplyScalar(d);}if(assemblyMode==='guided')return new T.Vector3(8,10,camera.aspect<.85?24:17);const distance=Math.max(43,17/(Math.tan(T.MathUtils.degToRad(camera.fov/2))*camera.aspect));return new T.Vector3(.12,.85,1).normalize().multiplyScalar(distance);};
+const MOBILE_FRAME_SCALE=.95;
+const buildCamera=()=>{if(phoneView()){const d=Math.max(44,13.4/(Math.tan(T.MathUtils.degToRad(camera.fov/2))*camera.aspect));return new T.Vector3(.85,.9,.15).normalize().multiplyScalar(d*MOBILE_FRAME_SCALE);}if(assemblyMode==='guided')return new T.Vector3(8,10,camera.aspect<.85?24:17);const distance=Math.max(43,17/(Math.tan(T.MathUtils.degToRad(camera.fov/2))*camera.aspect));return new T.Vector3(.12,.85,1).normalize().multiplyScalar(distance);};
 // One mobile frame for awakening, follow and explicit reframe. A lower
 // elevation shows faces without losing the workbench and scattered pieces.
 function playView(){
  if(!phoneView())return{position:new T.Vector3(14,20,35),target:new T.Vector3(0,1,0)};
  const[a,b]=figures,target=new T.Vector3((a.x+b.x)/2,1.3,(a.z+b.z)/2);
  const distance=Math.max(21,(Math.abs(a.x-b.x)+7)/(2*Math.tan(T.MathUtils.degToRad(camera.fov/2))*camera.aspect),(Math.abs(a.z-b.z)+7)*1.55);
- return{target,position:target.clone().add(new T.Vector3(.1,.56,1).normalize().multiplyScalar(distance))};
+ return{target,position:target.clone().add(new T.Vector3(.1,.56,1).normalize().multiplyScalar(distance*MOBILE_FRAME_SCALE))};
 }
 function setBuildView(){camera.position.copy(buildCamera());controls.target.set(0,phoneView()?.4:1,0);controls.enabled=true;controls.enablePan=true;controls.enableZoom=true;controls.enableRotate=true;controls.mouseButtons.LEFT=T.MOUSE.ROTATE;controls.mouseButtons.RIGHT=T.MOUSE.PAN;controls.touches.ONE=T.TOUCH.ROTATE;controls.touches.TWO=T.TOUCH.DOLLY_PAN;pauseOrbitForPiece();controls.enabled=true;}
 function pauseOrbitForPiece(){
